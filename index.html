@@ -985,7 +985,7 @@ function parseMidi(data) {
   const type = st & 0xf0, ch = st & 0x0f;
   if (type === 0xe0) return { src: "pb:" + ch, abs: ((d2 << 7) | d1) / 16383 };
   if (type === 0xb0) {
-    const rel = (d2 >= 1 && d2 <= 15) || (d2 >= 65 && d2 <= 79);
+    const rel = (d2 >= 1 && d2 <= 7) || (d2 >= 65 && d2 <= 71);
     return { src: `cc:${ch}:${d1}:${rel ? "r" : "a"}`, alt: `cc:${ch}:${d1}:${rel ? "a" : "r"}`, abs: d2 / 127, ticks: d2 < 64 ? d2 : -(d2 - 64), press: d2 > 63 };
   }
   if (type === 0x90 && d2 > 0) return { src: `note:${ch}:${d1}`, press: true };
@@ -1011,6 +1011,24 @@ function runFunc(f, m) {
   }
 }
 
+let learnCc = null;
+function finishLearn(src, fnId) {
+  const f = fnId || learning;
+  const alt = src.startsWith("cc:") ? src.replace(/:(r|a)$/, src.endsWith(":r") ? ":a" : ":r") : null;
+  // um controle só faz uma coisa: sai das outras funções
+  Object.keys(smcMap).forEach(k => { smcMap[k] = (smcMap[k] || []).filter(x => x !== src && x !== alt); });
+  smcMap[f] = [src];
+  learning = null; learnCc = null; saveMap(); renderMap();
+  $("smcLearnHint").innerHTML = "Pronto: <b>" + esc(srcName(src)) + "</b> agora faz <b>" + esc(FUNCS.find(x => x.id === f).name) + "</b>.";
+  const row = $("smcMap").querySelector(`[data-f="${f}"]`); if (row) { row.classList.add("flash"); setTimeout(() => row.classList.remove("flash"), 900); }
+}
+function finishLearnCc() {
+  if (!learnCc) return;
+  const v = learnCc.vals;
+  // knob infinito manda sempre valores pequenos (1..7 para um lado, 65..71 para o outro); fader manda a posição
+  const rel = v.every(x => (x >= 1 && x <= 7) || (x >= 65 && x <= 71));
+  finishLearn(learnCc.id + (rel ? ":r" : ":a"), learnCc.fn);
+}
 let diagCount = 0;
 function onMidi(e) {
   const m = parseMidi(e.data);
@@ -1019,13 +1037,18 @@ function onMidi(e) {
   if (!m) return;
   $("smcLast").textContent = srcName(m.src);
   if (learning) {
-    // um controle só faz uma coisa: sai das outras funções
-    Object.keys(smcMap).forEach(k => { smcMap[k] = (smcMap[k] || []).filter(x => x !== m.src && x !== m.alt); });
-    smcMap[learning] = [m.src];
-    const done = learning;
-    learning = null; saveMap(); renderMap();
-    $("smcLearnHint").innerHTML = "Pronto: <b>" + esc(srcName(m.src)) + "</b> agora faz <b>" + esc(FUNCS.find(f => f.id === done).name) + "</b>.";
-    const row = $("smcMap").querySelector(`[data-f="${done}"]`); if (row) { row.classList.add("flash"); setTimeout(() => row.classList.remove("flash"), 900); }
+    if (m.src.startsWith("cc:")) {
+      // CC: observa o controle por meio segundo para saber se é fader (valor absoluto) ou knob que gira (relativo)
+      const id = m.src.split(":").slice(0, 3).join(":");
+      if (!learnCc || learnCc.id !== id) {
+        learnCc = { id, vals: [], fn: learning };
+        $("smcLearnHint").innerHTML = "Lendo o controle… continue mexendo um pouquinho.";
+        setTimeout(finishLearnCc, 600);
+      }
+      learnCc.vals.push(e.data[2] || 0);
+      return;
+    }
+    finishLearn(m.src);
     return;
   }
   FUNCS.forEach(f => {
@@ -1098,6 +1121,8 @@ async function smcConnect() {
 }
 $("smcConnect").addEventListener("click", smcConnect);
 renderMap();
+// fora do Claude (link secreto no app Web MIDI Browser ou no Chrome) já tenta conectar ao abrir
+if (window.PAD_ENC && navigator.requestMIDIAccess) setTimeout(smcConnect, 400);
 // se já deu permissão antes, conecta sozinho
 try { if (navigator.permissions && navigator.requestMIDIAccess) navigator.permissions.query({ name: "midi" }).then(r => { if (r.state === "granted") smcConnect(); }).catch(() => {}); } catch (e) {}
 function setEstilo(e) {
