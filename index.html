@@ -169,6 +169,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
 .style { flex: 0 0 auto; border-radius: 999px; padding: 8px 14px; display: block; white-space: nowrap; }
 .style .n { font-size: .9rem; }
 .style .m { display: none; }
+.style .sn { display: none; }
 .keys { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
 .key { aspect-ratio: auto; height: clamp(58px, 12vw, 104px); border-radius: 14px; }
 .key .nm { font-size: clamp(1.2rem, 4.4vw, 2.2rem); }
@@ -290,6 +291,14 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media (max-width: 520px) {
+  .styles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .style, [data-estilo] .style { padding: 7px 4px; text-align: center; border-radius: 10px; min-width: 0; }
+  .presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; width: 100%; }
+  .presets button, [data-estilo] .presets button { padding: 6px 2px; font-size: .76rem; }
+  .style .n { display: none; }
+  .style .sn, [data-estilo] .style .sn { display: block; font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0; }
+}
+@media (max-width: 520px) {
   [data-estilo="estudio"] .style .n { letter-spacing: .02em; font-size: .74rem; }
   [data-estilo="estudio"] .style { padding: 6px 10px; }
   [data-estilo="estudio"] .bar .status { font-size: .74rem; }
@@ -381,13 +390,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
 // rec = gravações do mesmo pad em tons diferentes: cada tom usa a mais perto (estica menos o som).
 // Fundo com acordes: prog: [graus], ex.: [1, 4, 6, 5]. Pad com terça (acorde maior): third: true.
 const PADS = [
-  { name: "Pad + Reverse", credit: "House of Pads",
+  { name: "Pad + Reverse", short: "Reverse", credit: "House of Pads",
     rec: [{ file: "pads/00.mp3", root: 7 }, { file: "pads/02.mp3", root: 0 }] },
-  { name: "C# Major Pad", credit: "Vishal Bhojane", rec: [{ file: "pads/01.mp3", root: 1 }] },
+  { name: "C# Major Pad", short: "C# Major", credit: "Vishal Bhojane", rec: [{ file: "pads/01.mp3", root: 1 }] },
   // as partes em Dó da música, em loop, filtradas para ficar só a nota Dó
-  { name: "The Weight of Stillness", credit: "Gerado no Gemini", rec: [{ file: "pads/03.mp3", root: 0 }] },
+  { name: "The Weight of Stillness", short: "Stillness", credit: "Gerado no Gemini", rec: [{ file: "pads/03.mp3", root: 0 }] },
   // as partes em F# de "The Single Constant", em loop, só a nota F#
-  { name: "The Single Constant", credit: "Gerado no Gemini", rec: [{ file: "pads/04.mp3", root: 6 }] },
+  { name: "The Single Constant", short: "Constant", credit: "Gerado no Gemini", rec: [{ file: "pads/04.mp3", root: 6 }] },
 ];
 
 const KEYS = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -821,7 +830,7 @@ const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","
 
 function buildStyles() {
   $("styles").innerHTML = PADS.map((p, i) =>
-    `<button class="style" data-i="${i}"><span class="n">${esc(p.name)}</span>` +
+    `<button class="style" data-i="${i}" title="${esc(p.name)}"><span class="n">${esc(p.name)}</span><span class="sn">${esc(p.short || p.name)}</span>` +
     `<span class="m">${p.prog ? "Fundo com acordes · " : ""}Gravado em <span class="k">${p.rec.map(r => KEYS[r.root]).join(" e ")}</span> · ${esc(p.credit)}</span></button>`).join("");
   $("styles").querySelectorAll(".style").forEach(b => b.addEventListener("click", () => togglePad(+b.dataset.i)));
 }
