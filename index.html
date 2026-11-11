@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<script>window.PAD_ENC = true;</script>
+</head><body>
+<title>Pad Noah’s</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500;600&family=Sora:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Layout: palco escuro de culto — faixa de pads no alto, grade de 12 tons no centro, controles ao lado (embaixo no celular).
+   Visual único escuro de propósito: é usado no palco, com pouca luz. */
+:root {
+  --bg: #0f0c1d;
+  --bg2: #17132b;
+  --card: #1f1a38;
+  --card-hi: #2a2349;
+  --line: #3a3160;
+  --fg: #ece9f7;
+  --dim: #a39cc4;
+  --pad: #b69cff;
+  --pad-ink: #1a1233;
+  --warm: #ffb547;
+  --stop: #ff6b6b;
+  --f-display: "Outfit", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(1200px 600px at 70% -10%, #2b2160 0%, transparent 60%), var(--bg);
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 15px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px 28px;
+}
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; margin: 0; letter-spacing: .01em; }
+h1 span { color: var(--pad); }
+.status { color: var(--dim); font-size: .9rem; font-variant-numeric: tabular-nums; }
+.status b { color: var(--fg); font-weight: 600; }
+
+.label { font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; color: var(--dim); margin: 0 0 8px; }
+
+/* Pads (estilos) */
+.styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.style {
+  text-align: left; border: 1px solid var(--line); background: var(--card); color: var(--fg);
+  border-radius: 14px; padding: 12px 14px; cursor: pointer; display: grid; gap: 2px; min-width: 0;
+  font: inherit; transition: background .15s, border-color .15s;
+}
+.style:hover { background: var(--card-hi); }
+.style .n { font-family: var(--f-display); font-weight: 600; font-size: 1.05rem; overflow-wrap: anywhere; }
+.style .m { color: var(--dim); font-size: .82rem; }
+.style .k { font-variant-numeric: tabular-nums; }
+.style[aria-pressed="true"] { background: var(--pad); color: var(--pad-ink); border-color: var(--pad); }
+.style[aria-pressed="true"] .m { color: #3b2c6e; }
+.style.loading .m::after { content: " · carregando…"; }
+
+/* Grade de tons + lateral */
+.main { display: grid; grid-template-columns: 1fr 220px; gap: 16px; align-items: start; }
+.keys { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.key {
+  aspect-ratio: 1 / 1; max-width: 100%; border-radius: 18px; border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--card-hi), var(--card)); color: var(--fg); cursor: pointer;
+  display: grid; place-content: center; text-align: center; gap: 2px; font: inherit; position: relative;
+  transition: transform .08s, background .2s, box-shadow .2s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.key:active { transform: scale(.97); }
+.key .nm { font-family: var(--f-display); font-size: clamp(1.5rem, 4.2vw, 2.6rem); font-weight: 600; line-height: 1; }
+.key .pt { color: var(--dim); font-size: .8rem; }
+.key .st { position: absolute; left: 0; right: 0; bottom: 8px; font-size: .7rem; color: var(--pad-ink); }
+.key.on { background: var(--pad); color: var(--pad-ink); border-color: var(--pad); box-shadow: 0 0 28px rgba(182,156,255,.45); }
+.key.on .pt { color: #3b2c6e; }
+.key kbd { position: absolute; top: 6px; right: 8px; font: 500 .62rem var(--f-body); color: var(--dim); opacity: .7; }
+.key.on kbd { color: #3b2c6e; }
+
+.side { display: grid; gap: 12px; background: var(--bg2); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+.ctl { display: grid; gap: 6px; }
+.ctl .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ctl output { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+input[type="range"] { width: 100%; accent-color: var(--pad); }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button.small {
+  border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 10px;
+  padding: 10px; font: 600 1rem var(--f-body); cursor: pointer;
+}
+button.small:hover { background: var(--card-hi); }
+#stop {
+  border: 0; border-radius: 12px; padding: 14px; font: 700 1rem var(--f-display); letter-spacing: .04em;
+  background: var(--card-hi); color: var(--dim); cursor: pointer;
+}
+#stop.live { background: var(--warm); color: #2a1a00; }
+
+/* Mesinha */
+.smc { background: var(--bg2); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 10px; }
+.smc .head { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.smc h2 { font-family: var(--f-display); font-size: 1.15rem; margin: 0; font-weight: 600; margin-right: auto; }
+.smc-state { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: .88rem; }
+.smc .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--stop); transition: box-shadow .1s; }
+.smc .dot.ok { background: #4ade80; }
+.smc .dot.blink { box-shadow: 0 0 0 4px rgba(74,222,128,.35); }
+.smc details summary { cursor: pointer; color: var(--dim); font-size: .88rem; }
+.smc-map { display: grid; gap: 4px; padding-top: 8px; font-size: .86rem; color: var(--dim); }
+.smc-map b { color: var(--fg); font-weight: 600; }
+
+/* Efeitos */
+.fx { background: var(--bg2); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 12px; }
+.fx .head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+.fx h2 { font-family: var(--f-display); font-size: 1.15rem; margin: 0; font-weight: 600; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.presets button { border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 999px; padding: 6px 14px; font: 600 .85rem var(--f-body); cursor: pointer; }
+.presets button[aria-pressed="true"] { background: var(--pad); color: var(--pad-ink); border-color: var(--pad); }
+.fxgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px 18px; }
+.fxgrid .ctl small { color: var(--dim); font-size: .75rem; }
+
+/* Ajuda de escala */
+.scale { background: var(--bg2); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 8px; }
+.scale h2 { font-family: var(--f-display); font-size: 1.15rem; margin: 0; font-weight: 600; }
+.scale .line { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+.scale .line > span:first-child { width: 110px; color: var(--dim); font-size: .85rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.chip { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 3px 8px; font-weight: 600; }
+.chip small { color: var(--dim); font-weight: 400; margin-left: 4px; }
+.chip.tonic { background: var(--pad); color: var(--pad-ink); border-color: var(--pad); }
+.chip.tonic small { color: #3b2c6e; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--dim); padding: 6px 12px; font: 600 .85rem var(--f-body); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--pad); color: var(--pad-ink); }
+.seg.modo { display: grid; grid-template-columns: 1fr 1fr; }
+.seg.modo button { padding: 8px; }
+.hint { color: var(--dim); font-size: .82rem; margin: 0; }
+
+button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; }
+
+/* ---------- Estilos (botão no alto): Aurora (padrão) e Estúdio ---------- */
+.estilo { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.estilo button { border: 0; background: transparent; color: var(--dim); padding: 6px 14px; font: 600 .82rem var(--f-body); cursor: pointer; }
+.estilo button[aria-pressed="true"] { background: var(--pad); color: var(--pad-ink); }
+.top-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+:root[data-estilo="aurora"] { --bg:#070b18; --bg2:rgba(255,255,255,.07); --card:rgba(255,255,255,.08); --card-hi:rgba(255,255,255,.14); --line:rgba(255,255,255,.16);
+  --fg:#f2f6ff; --dim:rgba(225,235,255,.68); --pad:#7cf5d0; --pad-ink:#06241b; --warm:#ffd36e; --f-display:"Sora", system-ui, sans-serif; --f-body:"Sora", system-ui, sans-serif; }
+[data-estilo="aurora"] body { background:
+  radial-gradient(800px 500px at 10% 10%, rgba(0,200,170,.45), transparent 60%),
+  radial-gradient(700px 500px at 90% 0%, rgba(140,80,255,.5), transparent 60%),
+  radial-gradient(900px 600px at 70% 100%, rgba(255,80,160,.35), transparent 60%), #070b18; background-attachment: fixed; }
+[data-estilo="aurora"] .style,
+[data-estilo="aurora"] .key,
+[data-estilo="aurora"] .side,
+[data-estilo="aurora"] .fx,
+[data-estilo="aurora"] .scale,
+[data-estilo="aurora"] button.small,
+[data-estilo="aurora"] .presets button,
+[data-estilo="aurora"] .chip { backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); }
+[data-estilo="aurora"] .style,
+[data-estilo="aurora"] .side,
+[data-estilo="aurora"] .fx,
+[data-estilo="aurora"] .scale { border-radius: 22px; }
+[data-estilo="aurora"] .key { border-radius: 26px; background: rgba(255,255,255,.08); }
+[data-estilo="aurora"] .key.on { background: linear-gradient(160deg, rgba(124,245,208,.95), rgba(90,170,255,.9)); color: #04211a; box-shadow: 0 0 40px rgba(124,245,208,.45); }
+[data-estilo="aurora"] .key.on .pt,
+[data-estilo="aurora"] .key.on kbd,
+[data-estilo="aurora"] .key.on .st { color: #0b3b30; }
+[data-estilo="aurora"] .style[aria-pressed="true"] { background: linear-gradient(160deg, rgba(124,245,208,.95), rgba(90,170,255,.9)); }
+[data-estilo="aurora"] .style[aria-pressed="true"] .m { color: #0b3b30; }
+[data-estilo="aurora"] #stop.live { background: #ffd36e; color: #2a1c00; }
+[data-estilo="aurora"] .chip.tonic small { color: #0b3b30; }
+:root[data-estilo="estudio"] { --bg:#151515; --bg2:#1f1f1f; --card:#262626; --card-hi:#2e2e2e; --line:#3a3a3a; --fg:#e9e6df; --dim:#8f8a80;
+  --pad:#ffae2b; --pad-ink:#1a1000; --warm:#ffae2b; --f-display:"IBM Plex Sans Condensed", system-ui, sans-serif; --f-body:"IBM Plex Sans Condensed", system-ui, sans-serif; --f-mono:"IBM Plex Mono", ui-monospace, monospace; }
+[data-estilo="estudio"] body { background: repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 1px, transparent 1px 3px), linear-gradient(180deg, #1b1b1b, #111); }
+[data-estilo="estudio"] h1 { text-transform: uppercase; letter-spacing: .12em; font-size: 1.4rem; }
+[data-estilo="estudio"] h1 span { color: var(--pad); }
+[data-estilo="estudio"] .label,
+[data-estilo="estudio"] .ctl label,
+[data-estilo="estudio"] .fxgrid label { text-transform: uppercase; letter-spacing: .14em; font-size: .7rem; }
+[data-estilo="estudio"] .style { border-radius: 4px; background: linear-gradient(180deg, #2c2c2c, #222); border-color: #111; box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+[data-estilo="estudio"] .style .n { text-transform: uppercase; letter-spacing: .06em; font-size: .95rem; }
+[data-estilo="estudio"] .style[aria-pressed="true"] { background: linear-gradient(180deg, #2c2c2c, #222); color: var(--pad); border-color: var(--pad); box-shadow: 0 0 0 1px var(--pad), 0 0 18px rgba(255,174,43,.25); }
+[data-estilo="estudio"] .style[aria-pressed="true"] .m { color: #c9a15a; }
+[data-estilo="estudio"] .key { border-radius: 6px; background: linear-gradient(180deg, #303030, #1f1f1f); border: 1px solid #0c0c0c; box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 3px 0 #0a0a0a; }
+[data-estilo="estudio"] .key::before { content: ""; position: absolute; top: 10px; left: 10px; width: 8px; height: 8px; border-radius: 50%; background: #3a2a10; }
+[data-estilo="estudio"] .key .nm { font-family: var(--f-display); text-transform: uppercase; }
+[data-estilo="estudio"] .key.on { background: linear-gradient(180deg, #303030, #1f1f1f); color: var(--pad); border-color: #0c0c0c; box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 3px 0 #0a0a0a, 0 0 26px rgba(255,174,43,.18); }
+[data-estilo="estudio"] .key.on::before { background: var(--pad); box-shadow: 0 0 10px 2px rgba(255,174,43,.8); }
+[data-estilo="estudio"] .key.on .pt,
+[data-estilo="estudio"] .key.on .st,
+[data-estilo="estudio"] .key.on kbd { color: #c9a15a; }
+[data-estilo="estudio"] .side,
+[data-estilo="estudio"] .fx,
+[data-estilo="estudio"] .scale { border-radius: 4px; background: #1d1d1d; border-color: #0e0e0e; box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+[data-estilo="estudio"] #stop { border-radius: 4px; }
+[data-estilo="estudio"] #stop.live { background: #d9382f; color: #fff; }
+[data-estilo="estudio"] .chip,
+[data-estilo="estudio"] .presets button,
+[data-estilo="estudio"] button.small { border-radius: 3px; }
+[data-estilo="estudio"] .chip.tonic small { color: #4a3510; }
+[data-estilo="estudio"] .label,
+[data-estilo="estudio"] .ctl label,
+[data-estilo="estudio"] .fxgrid label,
+[data-estilo="estudio"] .ctl output,
+[data-estilo="estudio"] .status,
+[data-estilo="estudio"] .key .pt,
+[data-estilo="estudio"] .key kbd,
+[data-estilo="estudio"] .key .st,
+[data-estilo="estudio"] .presets button,
+[data-estilo="estudio"] button.small,
+[data-estilo="estudio"] #stop { font-family: var(--f-mono); }
+[data-estilo="estudio"] .style .m { font-family: var(--f-mono); font-size: .76rem; }
+[data-estilo="estudio"] .estilo { border-radius: 4px; }
+
+@media (max-width: 760px) {
+  .main { grid-template-columns: 1fr; }
+  .keys { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .key kbd { display: none; }
+  .key.on .pt { display: none; }
+  .key .st { bottom: 6px; font-size: .62rem; }
+  .scale .line > span:first-child { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Pad <span>Noah’s</span></h1>
+    <div class="top-right">
+      <div class="status" id="status" aria-live="polite">Toque um tom para começar</div>
+      <div class="estilo" role="group" aria-label="Estilo da página">
+        <button id="st-aurora" aria-pressed="true">Aurora</button>
+        <button id="st-estudio" aria-pressed="false">Estúdio</button>
+      </div>
+    </div>
+  </header>
+
+  <section aria-labelledby="lbl-pads">
+    <p class="label" id="lbl-pads">Pads · toque para ligar ou desligar (dá para juntar mais de um)</p>
+    <div class="styles" id="styles"></div>
+  </section>
+
+  <section class="main">
+    <div>
+      <p class="label">Tom (o pad muda de altura para cada tom)</p>
+      <div class="keys" id="keys"></div>
+    </div>
+    <aside class="side">
+      <div class="ctl">
+        <div class="row"><label for="vol">Volume</label><output id="volOut">70%</output></div>
+        <input type="range" id="vol" min="0" max="100" value="70">
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="rev">Reverb de igreja</label><output id="revOut">35%</output></div>
+        <input type="range" id="rev" min="0" max="100" value="35">
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="cut">Cutoff</label><output id="cutOut">aberto</output></div>
+        <input type="range" id="cut" min="0" max="100" value="100" aria-describedby="cutHint">
+        <span class="hint" id="cutHint">Esquerda abafa (escuro), direita abre (brilhante).</span>
+      </div>
+      <div class="ctl">
+        <div class="row"><span>Ao tocar um tom</span></div>
+        <div class="seg modo" role="group" aria-label="Ao tocar um tom">
+          <button id="md-trocar" aria-pressed="true">Trocar</button>
+          <button id="md-somar" aria-pressed="false">Somar</button>
+        </div>
+        <span class="hint">Trocar: o novo tom substitui. Somar: junta tons (ex.: C + G).</span>
+      </div>
+      <div class="btns">
+        <button class="small" id="prev" aria-label="Tom anterior">◀ Tom</button>
+        <button class="small" id="next" aria-label="Próximo tom">Tom ▶</button>
+      </div>
+      <button id="stop">■ PARAR PAD</button>
+      <p class="hint">A troca de tom é suave (o novo entra enquanto o outro sai). Teclado: Z S X D C V G B H N J M, setas e Esc.</p>
+    </aside>
+  </section>
+
+  <section class="smc" aria-labelledby="smcTitle">
+    <div class="head">
+      <h2 id="smcTitle">Mesinha SMC-Mixer</h2>
+      <div class="smc-state"><span class="dot" id="smcDot"></span><span id="smcStatus">desconectada</span></div>
+      <button class="small" id="smcConnect">Conectar mesinha</button>
+    </div>
+    <p class="hint" id="smcHelp">No iPhone: abra esta página no app <b>Web MIDI Browser</b>, pareie a SMC por Bluetooth nele e toque em "Conectar mesinha". No computador ou Android: Chrome ou Edge.</p>
+    <details>
+      <summary>O que cada controle da mesinha faz</summary>
+      <div class="smc-map">
+        <div><b>Fader 7</b> volume do pad · <b>Fader 8 / master</b> volume</div>
+        <div><b>Faders 1–6</b> reverb · cutoff · oitava acima · oitava abaixo · movimento · eco</div>
+        <div><b>Knob 7</b> escolhe o tom · <b>Knob 8</b> cutoff · <b>Knob 1</b> respiração · <b>Knob 2</b> tempo de troca</div>
+        <div><b>MUTE 1–4</b> liga/desliga os pads 1–4 · <b>MUTE 7</b> parar · <b>MUTE 8</b> Trocar/Somar</div>
+        <div><b>SOLO 1–4</b> receitas Limpo · Celestial · Profundo · Oração · <b>SOLO 7</b> próximo pad</div>
+        <div><b>◀◀ ▶▶ / setas ◀ ▶</b> tom anterior/próximo · <b>▶</b> toca · <b>■</b> parar</div>
+      </div>
+    </details>
+  </section>
+
+  <section class="fx" aria-labelledby="fxTitle">
+    <div class="head">
+      <h2 id="fxTitle">Efeitos</h2>
+      <div class="presets" id="presets" role="group" aria-label="Receitas prontas"></div>
+    </div>
+    <div class="fxgrid" id="fxgrid"></div>
+  </section>
+
+  <section class="scale" aria-live="polite">
+    <div class="line" style="justify-content: space-between;">
+      <h2 id="tomTitle">Tom: —</h2>
+      <div class="seg" role="group" aria-label="Maior ou menor">
+        <button id="maj" aria-pressed="true">Maior</button>
+        <button id="min" aria-pressed="false">Menor</button>
+      </div>
+    </div>
+    <div class="line"><span>Escala</span><div class="chips" id="escala"></div></div>
+    <div class="line"><span>Pentatônica</span><div class="chips" id="penta"></div></div>
+    <div class="line"><span>Acordes do tom</span><div class="chips" id="acordes"></div></div>
+    <div class="line"><span>Sequência</span><div class="chips" id="seq"></div></div>
+    <div class="line" id="fundoLine" hidden><span>Acordes do fundo</span><div class="chips" id="fundo"></div></div>
+    <p class="hint" id="scaleHint">Estes pads não têm terça: o pad de G serve para G e para Gm.</p>
+  </section>
+</div>
+
+<script>
+// ---------- Pads (para pôr mais: arquivo em pads/, nome, tom em que o som está (0 = C ... 11 = B) e autor) ----------
+// rec = gravações do mesmo pad em tons diferentes: cada tom usa a mais perto (estica menos o som).
+// Fundo com acordes: prog: [graus], ex.: [1, 4, 6, 5]. Pad com terça (acorde maior): third: true.
+const PADS = [
+  { name: "Pad + Reverse", credit: "House of Pads",
+    rec: [{ file: "pads/00.mp3", root: 7 }, { file: "pads/02.mp3", root: 0 }] },
+  { name: "C# Major Pad", credit: "Vishal Bhojane", rec: [{ file: "pads/01.mp3", root: 1 }] },
+  // as partes em Dó da música, em loop, filtradas para ficar só a nota Dó
+  { name: "The Weight of Stillness", credit: "Gerado no Gemini", rec: [{ file: "pads/03.mp3", root: 0 }] },
+  // as partes em F# de "The Single Constant", em loop, só a nota F#
+  { name: "The Single Constant", credit: "Gerado no Gemini", rec: [{ file: "pads/04.mp3", root: 6 }] },
+];
+
+const KEYS = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const KEYS_PT = ["Dó","Dó#","Ré","Ré#","Mi","Fá","Fá#","Sol","Sol#","Lá","Lá#","Si"];
+const KBD = ["z","s","x","d","c","v","g","b","h","n","j","m"];
+const LOOP_XF = 3.0;
+// Efeitos (iguais aos do programa do notebook) e receitas prontas: [nome, efeitos, cutoff]
+const FX = [
+  ["up", "Oitava acima", "o mesmo pad uma oitava mais alta (brilho celestial)"],
+  ["down", "Oitava abaixo", "o mesmo pad uma oitava mais grave (mais peso)"],
+  ["motion", "Movimento", "o som ondula de leve (chorus)"],
+  ["breath", "Respiração", "o volume sobe e desce bem devagar"],
+  ["echo", "Eco", "repetições longas, de um lado para o outro"],
+];
+const FX0 = { up: 0, down: 0, motion: 0, breath: 0, echo: 0, fade: 2.5 };
+const PRESETS = [
+  ["Limpo", FX0, 1],
+  ["Celestial", { ...FX0, up: 0.45, motion: 0.4, echo: 0.3, fade: 3.5 }, 1],
+  ["Profundo", { ...FX0, down: 0.55, motion: 0.2, fade: 3 }, 0.55],
+  ["Oração", { ...FX0, breath: 0.45, motion: 0.25, echo: 0.15, fade: 6 }, 0.4],
+];
+
+let store = {};
+try { store = JSON.parse(localStorage.getItem("pads") || "{}"); } catch (e) { store = {}; }
+const save = () => { try { localStorage.setItem("pads", JSON.stringify(state)); } catch (e) {} };
+const state = {
+  // pads ligados (pode ser mais de um: tocam juntos no mesmo tom)
+  on: (Array.isArray(store.on) ? store.on : [Number.isInteger(store.pad) ? store.pad : 0])
+    .filter((i, n, a) => Number.isInteger(i) && i >= 0 && i < PADS.length && a.indexOf(i) === n),
+  vol: typeof store.vol === "number" ? store.vol : 0.7,
+  rev: typeof store.rev === "number" ? store.rev : 0.35,
+  cut: typeof store.cut === "number" ? store.cut : 1,
+  estilo: store.estilo === "estudio" ? "estudio" : "aurora",
+  somar: !!store.somar,
+  fx: Object.assign({ up: 0, down: 0, motion: 0, breath: 0, echo: 0, fade: 2.5 }, store.fx || {}),
+  minor: !!store.minor,
+};
+if (!state.on.length) state.on = [0];
+let activeKey = null;
+
+// ---------- Áudio ----------
+let ctx = null, master = null, dry = null, wet = null, filter = null;
+let busMain = null, busUp = null, busDown = null, fxn = {};
+const buffers = PADS.map(() => null);
+const loading = PADS.map(() => null);
+
+// iPhone: com a chave do silencioso ligada, o iOS corta o som de página.
+// Dizer que é "reprodução" (como app de música) e tocar um silêncio num <audio> no primeiro toque libera.
+const SILENCE = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=";
+let unlocked = false;
+function unlock() {
+  if (unlocked) return;
+  unlocked = true;
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+  try {
+    const a = new Audio(SILENCE);
+    a.setAttribute("playsinline", "");
+    a.loop = false;
+    const p = a.play();
+    if (p && p.catch) p.catch(() => {});
+  } catch (e) {}
+}
+document.addEventListener("pointerdown", unlock, { once: false, capture: true });
+document.addEventListener("keydown", unlock, { capture: true });
+
+function audio() {
+  if (ctx) return ctx;
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  ctx.onstatechange = () => render();
+  master = ctx.createGain();
+  master.gain.value = state.vol;
+  // camadas: o pad, a cópia uma oitava acima e a uma oitava abaixo
+  busMain = ctx.createGain(); busUp = ctx.createGain(); busDown = ctx.createGain();
+  busUp.gain.value = 0; busDown.gain.value = 0;
+  [busMain, busUp, busDown].forEach(b => b.connect(master));
+  // cutoff: passa-baixa logo depois do volume (o reverb também recebe o som já filtrado)
+  filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.Q.value = 0.707;
+  filter.frequency.value = cutHz(state.cut);
+  master.connect(filter);
+  dry = ctx.createGain();
+  wet = ctx.createGain();
+  const verb = ctx.createConvolver();
+  verb.buffer = churchImpulse(ctx);
+  // respiração: volume que sobe e desce (~11 s)
+  const trem = ctx.createGain();
+  const tremLfo = ctx.createOscillator(); tremLfo.frequency.value = 0.09;
+  const tremDepth = ctx.createGain(); tremDepth.gain.value = 0;
+  tremLfo.connect(tremDepth).connect(trem.gain); tremLfo.start();
+  filter.connect(trem);
+  // movimento (chorus): duas linhas de atraso de ~12 ms balançando devagar, uma de cada lado
+  const post = ctx.createGain();
+  const chDry = ctx.createGain(), chWet = ctx.createGain(); chWet.gain.value = 0;
+  const split = ctx.createChannelSplitter(2), merge = ctx.createChannelMerger(2);
+  trem.connect(chDry).connect(post);
+  trem.connect(split);
+  [0, 1].forEach(ch => {
+    const d = ctx.createDelay(0.05); d.delayTime.value = 0.012;
+    const lfo = ctx.createOscillator(); lfo.frequency.value = 0.3;
+    const depth = ctx.createGain(); depth.gain.value = 0.003;
+    lfo.connect(depth).connect(d.delayTime);
+    lfo.start(ctx.currentTime + ch * 0.83); // lados fora de fase
+    split.connect(d, ch); d.connect(merge, 0, ch);
+  });
+  merge.connect(chWet).connect(post);
+  // eco: vai de um lado (0,48 s) para o outro (0,72 s)
+  const send = ctx.createGain(); send.gain.value = 0;
+  const dA = ctx.createDelay(2), dB = ctx.createDelay(2);
+  dA.delayTime.value = 0.48; dB.delayTime.value = 0.72;
+  const fbA = ctx.createGain(), fbB = ctx.createGain();
+  const panL = ctx.createStereoPanner(), panR = ctx.createStereoPanner();
+  panL.pan.value = -0.8; panR.pan.value = 0.8;
+  post.connect(send).connect(dA);
+  dA.connect(panL).connect(dry);
+  dA.connect(fbA).connect(dB);
+  dB.connect(panR).connect(dry);
+  dB.connect(fbB).connect(dA);
+  post.connect(dry).connect(ctx.destination);
+  post.connect(verb).connect(wet).connect(ctx.destination);
+  panL.connect(verb); panR.connect(verb);
+  fxn = { trem, tremDepth, chDry, chWet, send, fbA, fbB };
+  setRev(state.rev);
+  applyFx();
+  return ctx;
+}
+
+// Reverb de igreja: ruído que some devagar (~4 s), um pouco mais escuro no fim.
+function churchImpulse(c) {
+  const len = Math.floor(c.sampleRate * 4.2);
+  const buf = c.createBuffer(2, len, c.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = buf.getChannelData(ch);
+    let lp = 0;
+    for (let i = 0; i < len; i++) {
+      const t = i / c.sampleRate;
+      const env = Math.pow(1 - i / len, 2.2) * Math.min(1, t / 0.02);
+      const k = 0.55 - 0.4 * (i / len);
+      lp += k * ((Math.random() * 2 - 1) - lp);
+      d[i] = lp * env * 0.6;
+    }
+  }
+  return buf;
+}
+
+// 0..1 → 200 Hz .. 20 kHz, em escala de ouvido (igual ao programa do notebook)
+const cutHz = v => 200 * Math.pow(100, v);
+const cutLabel = v => v >= 0.995 ? "aberto" : (cutHz(v) >= 1000 ? (cutHz(v) / 1000).toFixed(1).replace(".", ",") + " kHz" : Math.round(cutHz(v)) + " Hz");
+
+function applyFx() {
+  if (!ctx) return;
+  const t = ctx.currentTime, f = state.fx, k = 0.08;
+  busUp.gain.setTargetAtTime(f.up * 0.8, t, k);
+  busDown.gain.setTargetAtTime(f.down * 0.9, t, k);
+  const d = f.breath * 0.7;
+  fxn.trem.gain.setTargetAtTime(1 - d / 2, t, k);
+  fxn.tremDepth.gain.setTargetAtTime(d / 2, t, k);
+  fxn.chWet.gain.setTargetAtTime(f.motion * 0.5, t, k);
+  fxn.chDry.gain.setTargetAtTime(1 - f.motion * 0.25, t, k);
+  fxn.send.gain.setTargetAtTime(f.echo * 0.6, t, k);
+  const fb = 0.3 + f.echo * 0.3;
+  fxn.fbA.gain.setTargetAtTime(fb, t, k);
+  fxn.fbB.gain.setTargetAtTime(fb, t, k);
+}
+
+function setRev(v) {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  dry.gain.setTargetAtTime(1 - v * 0.35, t, 0.05);
+  wet.gain.setTargetAtTime(v * 0.9, t, 0.05);
+}
+
+function load(i) {
+  if (buffers[i]) return Promise.resolve(buffers[i]);
+  if (loading[i]) return loading[i];
+  const one = r => getAudio(r.file)
+    .then(a => new Promise((ok, bad) => c.decodeAudioData(a, ok, bad)))
+    .then(buf => ({ buf, root: r.root }));
+  const c = audio();
+  render();
+  loading[i] = Promise.all(PADS[i].rec.map(one))
+    .then(b => { buffers[i] = b; render(); return b; })
+    .catch(e => { loading[i] = null; if (e.message !== "sem chave") setStatus("Não consegui abrir " + PADS[i].name + ". Confira a internet e toque de novo."); render(); throw e; });
+  return loading[i];
+}
+
+// Baixa o som. Na cópia fora do Claude (link secreto) os sons vêm trancados (AES-GCM):
+// a chave vem no link (#k=...) e fica guardada neste aparelho.
+function padKey() {
+  const m = location.hash.match(/k=([A-Za-z0-9_-]+)/);
+  if (m) { try { localStorage.setItem("padkey", m[1]); } catch (e) {} return m[1]; }
+  try { return localStorage.getItem("padkey"); } catch (e) { return null; }
+}
+async function getAudio(file) {
+  if (!window.PAD_ENC) {
+    const res = await fetch(file);
+    if (!res.ok) throw new Error("não achei o arquivo");
+    return res.arrayBuffer();
+  }
+  const k = padKey();
+  if (!k) { setStatus("Abra a página pelo seu link completo (com a chave) uma vez."); throw new Error("sem chave"); }
+  const res = await fetch(file.replace(/\.mp3$/, ".bin"));
+  if (!res.ok) throw new Error("não achei o arquivo");
+  const data = new Uint8Array(await res.arrayBuffer());
+  const raw = Uint8Array.from(atob(k.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0));
+  const key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+  return crypto.subtle.decrypt({ name: "AES-GCM", iv: data.slice(0, 12) }, key, data.slice(12));
+}
+
+// Quanto acelerar (no máximo 6 semitons para cima ou para baixo).
+function pitch(root, key) {
+  let s = ((key - root) % 12 + 12) % 12;
+  if (s > 6) s -= 12;
+  return Math.pow(2, s / 12);
+}
+
+// Uma voz: o pad em loop, com emendas cruzadas (sem estalo) e entrada/saída suaves.
+// Uma camada: o som em loop, com emendas cruzadas (sem estalo).
+class Layer {
+  constructor(buffer, rate, bus, offset, fade, level) {
+    this.buffer = buffer; this.rate = rate;
+    this.out = ctx.createGain();
+    this.out.gain.value = 0;
+    this.out.connect(bus);
+    this.parts = [];
+    this.dead = false;
+    const t = ctx.currentTime + 0.03;
+    this.segment(t, offset % buffer.duration, false);
+    this.ramp(t, level, fade);
+  }
+  ramp(t, to, secs) {
+    const g = this.out.gain;
+    g.cancelScheduledValues(t);
+    g.setValueAtTime(g.value, t);
+    g.linearRampToValueAtTime(to, t + secs);
+  }
+  segment(when, offset, fadeIn) {
+    if (this.dead) return;
+    const src = ctx.createBufferSource();
+    src.buffer = this.buffer;
+    src.playbackRate.value = this.rate;
+    const g = ctx.createGain();
+    src.connect(g).connect(this.out);
+    const realLen = (this.buffer.duration - offset) / this.rate;
+    const xf = Math.min(LOOP_XF, realLen / 3);
+    g.gain.setValueAtTime(fadeIn ? 0 : 1, when);
+    if (fadeIn) g.gain.linearRampToValueAtTime(1, when + xf);
+    g.gain.setValueAtTime(1, when + realLen - xf);
+    g.gain.linearRampToValueAtTime(0, when + realLen);
+    src.start(when, offset);
+    src.stop(when + realLen + 0.05);
+    const part = { src, g };
+    this.parts.push(part);
+    src.onended = () => { this.parts = this.parts.filter(p => p !== part); };
+    const nextAt = when + realLen - xf;
+    const wait = Math.max(0, (nextAt - ctx.currentTime - 2) * 1000);
+    this.timer = setTimeout(() => this.segment(nextAt, 0, true), wait);
+  }
+  stop(fade) {
+    if (this.dead) return;
+    this.dead = true;
+    clearTimeout(this.timer);
+    this.ramp(ctx.currentTime, 0, fade);
+    setTimeout(() => { this.parts.forEach(p => { try { p.src.stop(); } catch (e) {} }); this.out.disconnect(); }, (fade + 0.3) * 1000);
+  }
+}
+
+// Uma voz = o pad + as cópias de oitava (que ficam mudas se o efeito estiver em 0).
+class Voice {
+  constructor(buffer, rate, fromStart, level = 1) {
+    this.buffer = buffer; this.rate = rate;
+    const d = buffer.duration;
+    // pad: começa num ponto qualquer, para não soar sempre igual; fundo com acordes: do começo
+    const off = fromStart ? 0 : Math.random() * d * 0.5;
+    const fade = state.fx.fade;
+    this.layers = [
+      new Layer(buffer, rate, busMain, off, fade, level),
+      new Layer(buffer, rate * 2, busUp, off + d * 0.37, fade, level),
+      new Layer(buffer, rate / 2, busDown, off + d * 0.61, fade, level),
+    ];
+  }
+  get parts() { return this.layers[0].parts; }
+  // volume desta voz na mistura (quando liga/desliga outro pad)
+  setLevel(level) { this.layers.forEach(l => { if (!l.dead) l.ramp(ctx.currentTime, level, 0.8); }); }
+  stop() { this.layers.forEach(l => l.stop(state.fx.fade * 1.2)); }
+}
+
+// vozes tocando agora: "pad:tom" → voz (dá para ter vários pads e vários tons juntos)
+const voices = new Map();
+let playId = 0;
+// tons ligados; `activeKey` = o último (é o que a ajuda de escala mostra)
+let activeKeys = [];
+function setKeys(keys) {
+  activeKeys = keys;
+  activeKey = keys.length ? keys[keys.length - 1] : null;
+}
+const vkey = (i, k) => i + ":" + k;
+// mais coisas juntas = cada uma um pouco mais baixa, para a mistura não estourar
+const mixLevel = () => 1 / Math.sqrt(Math.max(1, state.on.length * Math.max(1, activeKeys.length)));
+// para os testes e o resto da página: a voz do primeiro pad no último tom
+Object.defineProperty(window, "voice", { get: () => voices.get(vkey(state.on[0], activeKey)) || voices.values().next().value || null });
+
+function relevel() { voices.forEach(v => v.setLevel(mixLevel())); }
+
+async function startPad(i, key, id) {
+  let recs;
+  try { recs = await load(i); } catch (e) { return; }
+  if (id !== playId || !activeKeys.includes(key) || !state.on.includes(i)) return; // mudou enquanto carregava
+  const k = vkey(i, key);
+  if (voices.has(k)) voices.get(k).stop();
+  // a gravação que precisa esticar menos para este tom
+  const r = recs.reduce((a, b) => Math.abs(Math.log2(pitch(b.root, key))) < Math.abs(Math.log2(pitch(a.root, key))) ? b : a);
+  voices.set(k, new Voice(r.buf, pitch(r.root, key), !!PADS[i].prog, mixLevel()));
+  showPlaying();
+  render();
+}
+
+function stopVoices(test) {
+  [...voices.keys()].forEach(k => { if (test(k)) { voices.get(k).stop(); voices.delete(k); } });
+}
+
+function showPlaying() {
+  if (!activeKeys.length) return;
+  setStatus("Tocando <b>" + activeKeys.map(k => KEYS[k]).join(" + ") + "</b> · " + state.on.map(i => esc(PADS[i].name)).join(" + "));
+}
+
+// liga/desliga um pad (sempre fica pelo menos um)
+function togglePad(i) {
+  const on = state.on.includes(i);
+  if (on && state.on.length === 1) return;
+  state.on = on ? state.on.filter(x => x !== i) : [...state.on, i];
+  save();
+  if (on) stopVoices(k => k.startsWith(i + ":"));
+  else if (activeKeys.length) activeKeys.forEach(key => startPad(i, key, playId));
+  else load(i).catch(() => {});
+  relevel();
+  showPlaying();
+  render();
+}
+let wakeLock = null;
+
+function wake() {
+  unlock();
+  const c = audio();
+  // resume sem esperar: em alguns navegadores ele demora; se o som continuar bloqueado, a tela avisa
+  if (c.state !== "running") {
+    const r = c.resume();
+    if (r && r.catch) r.catch(() => {});
+    setTimeout(() => {
+      if (ctx.state !== "running" && activeKey !== null)
+        setStatus("O navegador está segurando o som. Toque no tom de novo (no iPhone, desligue a chave do silencioso).");
+    }, 1200);
+  }
+  keepAwake();
+}
+
+// Trocar: o tom tocado substitui os outros (passagem suave).
+function play(key) {
+  wake();
+  setKeys([key]);
+  const id = ++playId;
+  render();
+  voices.forEach(v => v.stop());
+  voices.clear();
+  state.on.forEach(i => startPad(i, key, id));
+}
+
+// Somar: liga/desliga este tom e deixa os outros tocando.
+function toggleKey(key) {
+  wake();
+  if (activeKeys.includes(key)) {
+    setKeys(activeKeys.filter(k => k !== key));
+    stopVoices(k => k.endsWith(":" + key));
+    if (!activeKeys.length) { stop(); return; }
+  } else {
+    setKeys([...activeKeys, key]);
+    state.on.forEach(i => startPad(i, key, playId));
+  }
+  relevel();
+  showPlaying();
+  render();
+}
+
+function stop() {
+  setKeys([]);
+  playId++;
+  voices.forEach(v => v.stop());
+  voices.clear();
+  setStatus("Pad parado");
+  render();
+}
+
+function press(key) {
+  if (state.somar) toggleKey(key);
+  else if (activeKeys.length === 1 && activeKey === key) stop();
+  else play(key);
+}
+
+function step(d) { play(((activeKey ?? (d > 0 ? -1 : 0)) + d + 12) % 12); }
+
+async function keepAwake() {
+  try { if (!wakeLock && navigator.wakeLock) { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => { wakeLock = null; }); } } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && activeKey !== null) keepAwake(); });
+
+// ---------- Teoria (escala com os nomes certos: Fá maior tem Bb, não A#) ----------
+const LET = ["C","D","E","F","G","A","B"], LET_PC = [0,2,4,5,7,9,11], SOL = ["Dó","Ré","Mi","Fá","Sol","Lá","Si"];
+const MAJ_T = [[0,0],[1,-1],[1,0],[2,-1],[2,0],[3,0],[3,1],[4,0],[5,-1],[5,0],[6,-1],[6,0]];
+const MIN_T = [[0,0],[0,1],[1,0],[2,-1],[2,0],[3,0],[3,1],[4,0],[4,1],[5,0],[6,-1],[6,0]];
+const acc = a => ({"-2":"bb","-1":"b","1":"#","2":"##"})[a] || "";
+function scale(key, minor) {
+  const letter = (minor ? MIN_T : MAJ_T)[key][0];
+  const steps = minor ? [0,2,3,5,7,8,10] : [0,2,4,5,7,9,11];
+  return steps.map((st, i) => {
+    const l = (letter + i) % 7, pc = (key + st) % 12;
+    let a = ((pc - LET_PC[l]) % 12 + 12) % 12; if (a > 6) a -= 12;
+    return { name: LET[l] + acc(a), pt: SOL[l] + acc(a) };
+  });
+}
+function chords(key, minor) {
+  const kinds = minor ? ["m","°","","m","m","",""] : ["","m","m","","","m","°"];
+  return scale(key, minor).map((n, i) => n.name + kinds[i]);
+}
+const PROGS_MAJ = [["a campeã",[1,5,6,4]],["começando triste",[6,4,1,5]],["adoração",[4,1,5,6]],["clássica / hino",[1,4,5,1]],["gospel",[2,5,1]]];
+const PROGS_MIN = [["épica",[1,6,3,7]],["subindo",[1,6,7]],["clássica menor",[1,4,5,1]],["ministração",[6,7,1]]];
+
+// ---------- Tela ----------
+const $ = id => document.getElementById(id);
+function setStatus(html) { $("status").innerHTML = html; }
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+
+function buildStyles() {
+  $("styles").innerHTML = PADS.map((p, i) =>
+    `<button class="style" data-i="${i}"><span class="n">${esc(p.name)}</span>` +
+    `<span class="m">${p.prog ? "Fundo com acordes · " : ""}Gravado em <span class="k">${p.rec.map(r => KEYS[r.root]).join(" e ")}</span> · ${esc(p.credit)}</span></button>`).join("");
+  $("styles").querySelectorAll(".style").forEach(b => b.addEventListener("click", () => togglePad(+b.dataset.i)));
+}
+
+function buildKeys() {
+  $("keys").innerHTML = KEYS.map((k, i) =>
+    `<button class="key" data-k="${i}" aria-label="Pad em ${KEYS_PT[i]}"><kbd>${KBD[i].toUpperCase()}</kbd>` +
+    `<span class="nm">${k}</span><span class="pt">${KEYS_PT[i]}</span><span class="st"></span></button>`).join("");
+  $("keys").querySelectorAll(".key").forEach(b => b.addEventListener("click", () => press(+b.dataset.k)));
+}
+
+function render() {
+  document.querySelectorAll(".style").forEach(b => {
+    const i = +b.dataset.i;
+    b.setAttribute("aria-pressed", String(state.on.includes(i)));
+    b.classList.toggle("loading", !!loading[i] && !buffers[i]);
+  });
+  document.querySelectorAll(".key").forEach(b => {
+    const on = activeKeys.includes(+b.dataset.k);
+    b.classList.toggle("on", on);
+    b.querySelector(".st").textContent = on ? (state.on.every(i => buffers[i]) ? "tocando" : "carregando…") : "";
+  });
+  $("stop").classList.toggle("live", activeKey !== null);
+  $("md-trocar").setAttribute("aria-pressed", String(!state.somar));
+  $("md-somar").setAttribute("aria-pressed", String(!!state.somar));
+  $("maj").setAttribute("aria-pressed", String(!state.minor));
+  $("min").setAttribute("aria-pressed", String(state.minor));
+  renderScale();
+}
+
+function renderScale() {
+  const key = activeKey ?? PADS[state.on[0]].rec[0].root;
+  const minor = state.minor;
+  const s = scale(key, minor);
+  $("tomTitle").textContent = "Tom: " + s[0].name + (minor ? "m" : "") + (activeKey === null ? " (toque um tom)" : "");
+  $("escala").innerHTML = s.map((n, i) => `<span class="chip${i ? "" : " tonic"}">${n.name}<small>${n.pt}</small></span>`).join("");
+  const pick = minor ? [0,2,3,4,6] : [0,1,2,4,5];
+  $("penta").innerHTML = pick.map(i => `<span class="chip">${s[i].name}</span>`).join("");
+  const ch = chords(key, minor);
+  $("acordes").innerHTML = ch.map(c => `<span class="chip">${c}</span>`).join("");
+  const pad = PADS[state.on.find(i => PADS[i].prog) ?? state.on[0]];
+  $("fundoLine").hidden = !pad.prog;
+  if (pad.prog) {
+    // o fundo tem acordes de tom maior: no tom escolhido, a sequência vai junto
+    const chMaj = chords(key, false);
+    $("fundo").innerHTML = `<span class="chip tonic">${pad.prog.map(x => chMaj[x - 1]).join(" – ")}` +
+      `<small>${pad.prog.join(" – ")} · troca a cada ${(8 / pitch(pad.rec[0].root, key)).toFixed(1).replace(".", ",")} s</small></span>`;
+    $("scaleHint").textContent = "Este fundo tem acordes de tom maior (começa uns 20 s parado no 1). Para tom menor, use o fundo do relativo maior: Em → G.";
+  } else if (pad.third) {
+    $("scaleHint").textContent = "Este pad tem terça (acorde maior): use em tom maior. Para tom menor, toque o relativo maior (Am → C, Em → G).";
+  } else {
+    $("scaleHint").textContent = "Estes pads não têm terça: o pad de G serve para G e para Gm.";
+  }
+  $("seq").innerHTML = (minor ? PROGS_MIN : PROGS_MAJ).map(([name, d]) =>
+    `<span class="chip">${d.map(x => ch[x - 1]).join(" – ")}<small>${name}</small></span>`).join("");
+}
+
+$("vol").value = Math.round(state.vol * 100); $("volOut").textContent = $("vol").value + "%";
+$("rev").value = Math.round(state.rev * 100); $("revOut").textContent = $("rev").value + "%";
+$("vol").addEventListener("input", e => {
+  state.vol = e.target.value / 100; $("volOut").textContent = e.target.value + "%"; save();
+  if (master) master.gain.setTargetAtTime(state.vol, ctx.currentTime, 0.05);
+});
+$("rev").addEventListener("input", e => {
+  state.rev = e.target.value / 100; $("revOut").textContent = e.target.value + "%"; save(); setRev(state.rev);
+});
+function buildFx() {
+  $("presets").innerHTML = PRESETS.map((p, i) => `<button data-p="${i}" aria-pressed="false">${p[0]}</button>`).join("");
+  $("presets").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    const [, fx, cut] = PRESETS[+b.dataset.p];
+    state.fx = { ...fx }; state.cut = cut; save();
+    syncFxInputs(); applyFx();
+    $("cut").value = Math.round(cut * 100); $("cutOut").textContent = cutLabel(cut);
+    if (filter) filter.frequency.setTargetAtTime(Math.min(cutHz(cut), ctx.sampleRate * 0.45), ctx.currentTime, 0.04);
+  }));
+  $("fxgrid").innerHTML = FX.map(([k, label, tip]) =>
+    `<div class="ctl"><div class="row"><label for="fx-${k}">${label}</label><output id="fxo-${k}"></output></div>` +
+    `<input type="range" id="fx-${k}" min="0" max="100"><small>${tip}</small></div>`).join("") +
+    `<div class="ctl"><div class="row"><label for="fx-fade">Tempo de troca</label><output id="fxo-fade"></output></div>` +
+    `<input type="range" id="fx-fade" min="5" max="100"><small>quanto o pad leva para entrar, sair e trocar de tom</small></div>`;
+  FX.forEach(([k]) => $("fx-" + k).addEventListener("input", e => {
+    state.fx[k] = e.target.value / 100; save(); syncFxInputs(); applyFx();
+  }));
+  $("fx-fade").addEventListener("input", e => { state.fx.fade = e.target.value / 10; save(); syncFxInputs(); });
+  syncFxInputs();
+}
+function syncFxInputs() {
+  FX.forEach(([k]) => { $("fx-" + k).value = Math.round(state.fx[k] * 100); $("fxo-" + k).textContent = state.fx[k] < 0.005 ? "0%" : Math.round(state.fx[k] * 100) + "%"; });
+  $("fx-fade").value = Math.round(state.fx.fade * 10);
+  $("fxo-fade").textContent = state.fx.fade.toFixed(1).replace(".", ",") + " s";
+  const same = (a, b) => Object.keys(FX0).every(k => Math.abs(a[k] - b[k]) < 0.005);
+  document.querySelectorAll("#presets button").forEach(b => {
+    const [, fx, cut] = PRESETS[+b.dataset.p];
+    b.setAttribute("aria-pressed", String(same(state.fx, fx) && Math.abs(state.cut - cut) < 0.01));
+  });
+}
+buildFx();
+
+// ---------- Mesinha SMC-Mixer (Web MIDI) — mesmo padrão Mackie do programa do notebook ----------
+// Funciona onde o navegador tem Web MIDI: Chrome/Edge no computador e Android, e o app Web MIDI Browser no iPhone.
+// Dentro da página do Claude o acesso a aparelhos é bloqueado: lá aparece o aviso.
+let midiAccess = null;
+let knobAcc = 0;
+function setSlider(id, v01) {
+  const el = $(id), lo = +el.min, hi = +el.max;
+  el.value = Math.round(lo + Math.min(1, Math.max(0, v01)) * (hi - lo));
+  el.dispatchEvent(new Event("input"));
+}
+function nudgeSlider(id, ticks) {
+  const el = $(id), lo = +el.min, hi = +el.max;
+  setSlider(id, (+el.value - lo) / (hi - lo) + ticks * 0.02);
+}
+const FADERS = ["rev", "cut", "fx-up", "fx-down", "fx-motion", "fx-echo"]; // faders 1–6
+function smcBlink() {
+  const d = $("smcDot"); d.classList.add("blink");
+  clearTimeout(smcBlink.t); smcBlink.t = setTimeout(() => d.classList.remove("blink"), 120);
+}
+function onMidi(e) {
+  const [st, d1 = 0, d2 = 0] = e.data;
+  const type = st & 0xf0, ch = st & 0x0f;
+  smcBlink();
+  if (type === 0xe0) { // fader (pitch bend)
+    const v = ((d2 << 7) | d1) / 16383;
+    if (ch < 6) setSlider(FADERS[ch], v);
+    else setSlider("vol", v); // fader 7 = volume do pad; 8 e master = volume
+  } else if (type === 0xb0 && d1 >= 16 && d1 <= 23) { // knobs (relativos)
+    const t = d2 < 64 ? d2 : -(d2 - 64);
+    const k = d1 - 16;
+    if (k === 6) { // knob 7 = escolhe o tom (2 cliques = 1 tom)
+      knobAcc += t;
+      while (Math.abs(knobAcc) >= 2) { step(knobAcc > 0 ? 1 : -1); knobAcc -= 2 * Math.sign(knobAcc); }
+    } else if (k === 7) nudgeSlider("cut", t);
+    else if (k === 0) nudgeSlider("fx-breath", t);
+    else if (k === 1) nudgeSlider("fx-fade", t);
+  } else if (type === 0x90 && d2 > 0) { // botões (só ao apertar)
+    if (d1 >= 16 && d1 <= 19 && d1 - 16 < PADS.length) togglePad(d1 - 16);       // MUTE 1–4
+    else if (d1 >= 8 && d1 <= 11) $("presets").querySelector(`[data-p="${d1 - 8}"]`).click(); // SOLO 1–4
+    else if (d1 === 22 || d1 === 93) stop();                                       // MUTE 7, ■
+    else if (d1 === 23) (state.somar ? $("md-trocar") : $("md-somar")).click();    // MUTE 8
+    else if (d1 === 14) { const n = (state.on[state.on.length - 1] + 1) % PADS.length; state.on = [n]; save(); if (activeKey !== null) play(activeKey); else render(); } // SOLO 7
+    else if (d1 === 91 || d1 === 98 || d1 === 46) step(-1);
+    else if (d1 === 92 || d1 === 99 || d1 === 47) step(1);
+    else if (d1 === 94) play(activeKey ?? PADS[state.on[0]].rec[0].root);
+  }
+}
+function smcRefresh() {
+  if (!midiAccess) return;
+  const ins = [...midiAccess.inputs.values()].filter(i => i.state !== "disconnected");
+  ins.forEach(i => { i.onmidimessage = onMidi; });
+  $("smcDot").classList.toggle("ok", ins.length > 0);
+  $("smcStatus").textContent = ins.length ? "conectada: " + ins.map(i => i.name).join(", ") : "nenhum aparelho MIDI (pareie a SMC e toque em Conectar)";
+}
+async function smcConnect() {
+  if (!navigator.requestMIDIAccess) {
+    $("smcStatus").textContent = "este navegador não tem MIDI";
+    $("smcHelp").innerHTML = "Este navegador não deixa a página falar com a mesinha. No iPhone use o app <b>Web MIDI Browser</b>; no computador ou Android, Chrome ou Edge. (Dentro do Claude não funciona.)";
+    return;
+  }
+  try {
+    midiAccess = await navigator.requestMIDIAccess({ sysex: false });
+    midiAccess.onstatechange = smcRefresh;
+    smcRefresh();
+  } catch (err) {
+    $("smcStatus").textContent = "o navegador não deixou (" + (err && err.name || "bloqueado") + ")";
+    $("smcHelp").innerHTML = "O acesso à mesinha foi bloqueado. Dentro do Claude isso é normal: abra a cópia da página no app <b>Web MIDI Browser</b> (iPhone) ou no Chrome.";
+  }
+}
+$("smcConnect").addEventListener("click", smcConnect);
+// se já deu permissão antes, conecta sozinho
+try { if (navigator.permissions && navigator.requestMIDIAccess) navigator.permissions.query({ name: "midi" }).then(r => { if (r.state === "granted") smcConnect(); }).catch(() => {}); } catch (e) {}
+function setEstilo(e) {
+  state.estilo = e; save();
+  document.documentElement.dataset.estilo = e;
+  $("st-aurora").setAttribute("aria-pressed", String(e === "aurora"));
+  $("st-estudio").setAttribute("aria-pressed", String(e === "estudio"));
+}
+$("st-aurora").addEventListener("click", () => setEstilo("aurora"));
+$("st-estudio").addEventListener("click", () => setEstilo("estudio"));
+setEstilo(state.estilo);
+
+$("cut").value = Math.round(state.cut * 100); $("cutOut").textContent = cutLabel(state.cut);
+$("cut").addEventListener("input", e => {
+  state.cut = e.target.value / 100; $("cutOut").textContent = cutLabel(state.cut); save(); syncFxInputs();
+  if (filter) filter.frequency.setTargetAtTime(Math.min(cutHz(state.cut), ctx.sampleRate * 0.45), ctx.currentTime, 0.04);
+});
+$("stop").addEventListener("click", stop);
+$("md-trocar").addEventListener("click", () => {
+  state.somar = false; save();
+  // voltando para Trocar com vários tons: fica só o último
+  if (activeKeys.length > 1) play(activeKey); else render();
+});
+$("md-somar").addEventListener("click", () => { state.somar = true; save(); render(); });
+$("prev").addEventListener("click", () => step(-1));
+$("next").addEventListener("click", () => step(1));
+$("maj").addEventListener("click", () => { state.minor = false; save(); render(); });
+$("min").addEventListener("click", () => { state.minor = true; save(); render(); });
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT" || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+  const k = KBD.indexOf(e.key.toLowerCase());
+  if (k >= 0) { press(k); e.preventDefault(); }
+  else if (e.key === "Escape" || e.key === " ") { stop(); e.preventDefault(); }
+  else if (e.key === "ArrowRight") step(1);
+  else if (e.key === "ArrowLeft") step(-1);
+});
+
+buildStyles();
+buildKeys();
+render();
+</script>
+
+</body></html>
