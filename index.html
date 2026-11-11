@@ -339,6 +339,67 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
   .chip { font-size: .78rem; padding: 2px 6px; }
 }
 
+/* Abas que não cabem: rolam para o lado */
+.tabs { overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button { white-space: nowrap; flex: none; }
+.panel .head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+.panel h2 { font-family: var(--f-display); font-size: 1rem; margin: 0; font-weight: 600; }
+.shots, .metro, .mine { background: var(--bg2); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 10px; }
+.shotvol { min-width: 200px; }
+.shotgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.shot { border: 1px solid var(--line); background: linear-gradient(180deg, var(--card-hi), var(--card)); color: var(--fg); border-radius: 14px;
+  padding: 14px 6px; font: 600 .9rem var(--f-body); cursor: pointer; display: grid; gap: 3px; justify-items: center; touch-action: manipulation; }
+.shot small { color: var(--dim); font-weight: 500; font-size: .68rem; }
+.shot.hit { background: var(--pad); color: var(--pad-ink); border-color: var(--pad); }
+.shot.hit small { color: var(--pad-ink); }
+.shot.own small::after { content: " · meu"; }
+.shot-own { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 8px; }
+.shot-own select { background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 8px; font: inherit; }
+.filebtn { display: inline-flex; align-items: center; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 10px; padding: 8px 12px; font: 600 .88rem var(--f-body); }
+.filebtn.primary { background: var(--pad); color: var(--pad-ink); border-color: var(--pad); }
+.metro-top { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.metro-go { border: 0; border-radius: 12px; padding: 12px 18px; font: 700 1rem var(--f-display); background: var(--pad); color: var(--pad-ink); cursor: pointer; }
+.metro-go.on { background: var(--warm); color: #2a1a00; }
+.bpm { display: flex; align-items: center; gap: 8px; }
+.bpmval { display: grid; justify-items: center; min-width: 64px; }
+.bpmval b { font: 700 1.8rem var(--f-display); font-variant-numeric: tabular-nums; line-height: 1; }
+.bpmval small { color: var(--dim); font-size: .7rem; letter-spacing: .1em; }
+.beats { display: flex; gap: 8px; }
+.beats span { flex: 1; height: 12px; border-radius: 6px; background: var(--card); border: 1px solid var(--line); transition: background .06s; }
+.beats span.acc { border-color: var(--pad); }
+.beats span.now { background: var(--pad); }
+.beats span.now.acc { background: var(--warm); border-color: var(--warm); }
+.metro-row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+.metro-row #bpm { flex: 1; }
+.clickvol { flex: 1; min-width: 180px; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: .84rem; color: var(--dim); }
+.check input { margin-top: 2px; accent-color: var(--pad); }
+.minelist { display: grid; gap: 8px; }
+.mine-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
+.mine-row input[type="text"] { background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; font: inherit; min-width: 0; }
+.mine-row select { background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 6px; font: inherit; }
+.mine-row button { border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 8px; padding: 7px 10px; font: 600 .8rem var(--f-body); cursor: pointer; }
+.mine-row button.danger { background: var(--stop); color: #fff; border-color: var(--stop); }
+.mine-empty { color: var(--dim); font-size: .86rem; }
+.style.mine-pad .sn::before, .style.mine-pad .n::before { content: "♪ "; }
+.metro-dot { width: 9px; height: 9px; border-radius: 50%; background: transparent; flex: none; }
+.metro-dot.on { background: var(--line); }
+.metro-dot.beat { background: var(--pad); }
+.metro-dot.beat.acc { background: var(--warm); }
+@media (max-width: 520px) {
+  .shotgrid { gap: 6px; }
+  .shot { padding: 10px 4px; font-size: .8rem; }
+  .bpmval b { font-size: 1.5rem; }
+  .metro-go { padding: 10px 14px; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .shotgrid { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 5px; }
+  .shot { padding: 8px 2px; font-size: .74rem; }
+  .shots, .metro, .mine { padding: 8px 12px; gap: 6px; }
+  .metro-go { padding: 7px 12px; font-size: .85rem; }
+}
+
 /* Tela cheia no iPhone: o conteúdo desce para baixo do Dynamic Island / entalhe (e do botão flutuante do app) */
 html.fs body { padding-top: max(env(safe-area-inset-top, 0px), 92px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px); }
 html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
@@ -349,6 +410,7 @@ html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
   <header class="bar">
     <h1>Pad <span>Noah’s</span></h1>
     <div class="status" id="status" aria-live="polite">Toque um tom para começar</div>
+    <span class="metro-dot" id="metroMini" title="Metrônomo"></span>
     <span class="mini-dot" id="smcMini" title="Mesinha"></span>
     <div class="estilo" role="group" aria-label="Estilo da página">
       <button id="st-aurora" aria-pressed="true">Aurora</button>
@@ -380,9 +442,61 @@ html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
 
   <nav class="tabs" role="tablist" aria-label="Mais opções">
     <button role="tab" id="tb-fx" data-tab="fx" aria-selected="true">Efeitos</button>
+    <button role="tab" id="tb-shots" data-tab="shots" aria-selected="false">Disparos</button>
+    <button role="tab" id="tb-metro" data-tab="metro" aria-selected="false">Metrônomo</button>
+    <button role="tab" id="tb-mine" data-tab="mine" aria-selected="false">Meus sons</button>
     <button role="tab" id="tb-scale" data-tab="scale" aria-selected="false">Escala</button>
     <button role="tab" id="tb-smc" data-tab="smc" aria-selected="false">Mesinha</button>
   </nav>
+  <section class="shots panel" id="tab-shots" role="tabpanel" aria-labelledby="tb-shots" hidden>
+    <div class="head">
+      <h2>Disparos</h2>
+      <div class="sl shotvol"><label for="shotVol">Volume</label><input type="range" id="shotVol" min="0" max="100" value="80"><output id="shotVolOut">80%</output></div>
+    </div>
+    <div class="shotgrid" id="shotgrid"></div>
+    <p class="hint">Cada toque dispara uma vez, por cima do pad, no tom que está tocando. Com o metrônomo ligado, <b>Subida</b> e <b>Prato invertido</b> terminam certinho no "1" do compasso.</p>
+    <details>
+      <summary>Trocar um botão por um som meu</summary>
+      <div class="shot-own">
+        <select id="shotSlot" aria-label="Qual botão"></select>
+        <label class="small filebtn">Escolher som…<input type="file" id="shotFile" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac" hidden></label>
+        <button class="small" id="shotReset">Voltar ao original</button>
+      </div>
+      <p class="hint" id="shotMsg">O som fica só neste aparelho.</p>
+    </details>
+  </section>
+  <section class="metro panel" id="tab-metro" role="tabpanel" aria-labelledby="tb-metro" hidden>
+    <div class="metro-top">
+      <button id="metroGo" class="metro-go">▶ Ligar</button>
+      <div class="bpm">
+        <button class="small" id="bpmMinus" aria-label="Menos 1 BPM">−</button>
+        <div class="bpmval"><b id="bpmVal">80</b><small>BPM</small></div>
+        <button class="small" id="bpmPlus" aria-label="Mais 1 BPM">+</button>
+      </div>
+      <button class="small" id="metroTap">Bater o tempo</button>
+    </div>
+    <div class="beats" id="beats"></div>
+    <div class="metro-row">
+      <input type="range" id="bpm" min="40" max="220" value="80" aria-label="BPM">
+    </div>
+    <div class="metro-row">
+      <div class="seg" role="group" aria-label="Compasso">
+        <button data-sig="4" aria-pressed="true">4/4</button>
+        <button data-sig="3" aria-pressed="false">3/4</button>
+        <button data-sig="6" aria-pressed="false">6/8</button>
+      </div>
+      <div class="sl clickvol"><label for="clickVol">Click</label><input type="range" id="clickVol" min="0" max="100" value="70"><output id="clickVolOut">70%</output></div>
+    </div>
+    <label class="check"><input type="checkbox" id="clickSplit"><span>Click só no lado <b>esquerdo</b> e pads só no <b>direito</b> (para fone de retorno / in-ear)</span></label>
+  </section>
+  <section class="mine panel" id="tab-mine" role="tabpanel" aria-labelledby="tb-mine" hidden>
+    <div class="head">
+      <h2>Meus sons</h2>
+      <label class="small filebtn primary">+ Adicionar som<input type="file" id="mineFile" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac" hidden></label>
+    </div>
+    <p class="hint" id="mineMsg">Escolha um MP3 ou WAV de pad. A página descobre o tom, iguala o volume e faz o loop. Fica <b>só neste aparelho</b>: ninguém mais vê.</p>
+    <div class="minelist" id="mineList"></div>
+  </section>
   <section class="fx panel" id="tab-fx" role="tabpanel" aria-labelledby="tb-fx">
     <div class="head">
       <h2 id="fxTitle">Efeitos</h2>
@@ -430,14 +544,19 @@ html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
 // rec = gravações do mesmo pad em tons diferentes: cada tom usa a mais perto (estica menos o som).
 // Fundo com acordes: prog: [graus], ex.: [1, 4, 6, 5]. Pad com terça (acorde maior): third: true.
 const PADS = [
-  { name: "Pad + Reverse", short: "Reverse", credit: "House of Pads",
+  { id: "reverse", partner: true, name: "Pad + Reverse", short: "Reverse", credit: "House of Pads",
     rec: [{ file: "pads/00.mp3", root: 7 }, { file: "pads/02.mp3", root: 0 }] },
-  { name: "C# Major Pad", short: "C# Major", credit: "Vishal Bhojane", rec: [{ file: "pads/01.mp3", root: 1 }] },
+  { id: "csharp", partner: true, name: "C# Major Pad", short: "C# Major", credit: "Vishal Bhojane", rec: [{ file: "pads/01.mp3", root: 1 }] },
   // as partes em Dó da música, em loop, filtradas para ficar só a nota Dó
-  { name: "The Weight of Stillness", short: "Stillness", credit: "Gerado no Gemini", rec: [{ file: "pads/03.mp3", root: 0 }] },
+  { id: "weight", name: "The Weight of Stillness", short: "Stillness", credit: "Gerado no Gemini", rec: [{ file: "pads/03.mp3", root: 0 }] },
   // as partes em F# de "The Single Constant", em loop, só a nota F#
-  { name: "The Single Constant", short: "Constant", credit: "Gerado no Gemini", rec: [{ file: "pads/04.mp3", root: 6 }] },
+  { id: "constant", name: "The Single Constant", short: "Constant", credit: "Gerado no Gemini", rec: [{ file: "pads/04.mp3", root: 6 }] },
 ];
+
+// Pads da parceria (partner: true) só aparecem no link com a chave do Theo; no link aberto ficam de fora.
+if (window.PAD_ENC && !padKey()) {
+  for (let i = PADS.length - 1; i >= 0; i--) if (PADS[i].partner) PADS.splice(i, 1);
+}
 
 const KEYS = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const KEYS_PT = ["Dó","Dó#","Ré","Ré#","Mi","Fá","Fá#","Sol","Sol#","Lá","Lá#","Si"];
@@ -461,11 +580,15 @@ const PRESETS = [
 
 let store = {};
 try { store = JSON.parse(localStorage.getItem("pads") || "{}"); } catch (e) { store = {}; }
-const save = () => { try { localStorage.setItem("pads", JSON.stringify(state)); } catch (e) {} };
+const save = () => { try { localStorage.setItem("pads", JSON.stringify({ ...state, onIds: state.on.map(i => PADS[i] && PADS[i].id) })); } catch (e) {} };
+// pads ligados salvos pelo id → índices de agora
+function onFromIds(ids) {
+  return (ids || []).map(id => PADS.findIndex(p => p.id === id)).filter((i, n, a) => i >= 0 && a.indexOf(i) === n);
+}
 const state = {
   // pads ligados (pode ser mais de um: tocam juntos no mesmo tom)
-  on: (Array.isArray(store.on) ? store.on : [Number.isInteger(store.pad) ? store.pad : 0])
-    .filter((i, n, a) => Number.isInteger(i) && i >= 0 && i < PADS.length && a.indexOf(i) === n),
+  on: Array.isArray(store.onIds) ? onFromIds(store.onIds)
+    : (Array.isArray(store.on) ? store.on : [0]).filter((i, n, a) => Number.isInteger(i) && i >= 0 && i < PADS.length && a.indexOf(i) === n),
   vol: typeof store.vol === "number" ? store.vol : 0.7,
   rev: typeof store.rev === "number" ? store.rev : 0.35,
   cut: typeof store.cut === "number" ? store.cut : 1,
@@ -480,6 +603,7 @@ let activeKey = null;
 // ---------- Áudio ----------
 let ctx = null, master = null, dry = null, wet = null, filter = null;
 let busMain = null, busUp = null, busDown = null, fxn = {};
+let outBus = null, padPan = null, shotBus = null;
 const buffers = PADS.map(() => null);
 const loading = PADS.map(() => null);
 
@@ -555,8 +679,16 @@ function audio() {
   dA.connect(fbA).connect(dB);
   dB.connect(panR).connect(dry);
   dB.connect(fbB).connect(dA);
-  post.connect(dry).connect(ctx.destination);
-  post.connect(verb).connect(wet).connect(ctx.destination);
+  // saída dos pads → (direita, se o click estiver separado) → caixas
+  outBus = ctx.createGain();
+  padPan = ctx.createStereoPanner();
+  outBus.connect(padPan).connect(ctx.destination);
+  post.connect(dry).connect(outBus);
+  post.connect(verb).connect(wet).connect(outBus);
+  // disparos (efeitos por cima dos pads): ganham reverb e eco, mas não o cutoff
+  shotBus = ctx.createGain();
+  shotBus.gain.value = typeof state.shotVol === "number" ? state.shotVol : 0.8;
+  shotBus.connect(post);
   panL.connect(verb); panR.connect(verb);
   fxn = { trem, tremDepth, chDry, chWet, send, fbA, fbB };
   setRev(state.rev);
@@ -612,7 +744,7 @@ function setRev(v) {
 function load(i) {
   if (buffers[i]) return Promise.resolve(buffers[i]);
   if (loading[i]) return loading[i];
-  const one = r => getAudio(r.file)
+  const one = r => getAudio(r, PADS[i].partner)
     .then(a => new Promise((ok, bad) => c.decodeAudioData(a, ok, bad)))
     .then(buf => ({ buf, root: r.root }));
   const c = audio();
@@ -630,8 +762,10 @@ function padKey() {
   if (m) { try { localStorage.setItem("padkey", m[1]); } catch (e) {} return m[1]; }
   try { return localStorage.getItem("padkey"); } catch (e) { return null; }
 }
-async function getAudio(file) {
-  if (!window.PAD_ENC) {
+async function getAudio(r, partner) {
+  if (r.blob) return mineData(r.blob); // som que a pessoa pôs neste aparelho
+  const file = r.file;
+  if (!window.PAD_ENC || !partner) {
     const res = await fetch(file);
     if (!res.ok) throw new Error("não achei o arquivo");
     return res.arrayBuffer();
@@ -870,7 +1004,7 @@ const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","
 
 function buildStyles() {
   $("styles").innerHTML = PADS.map((p, i) =>
-    `<button class="style" data-i="${i}" title="${esc(p.name)}"><span class="n">${esc(p.name)}</span><span class="sn">${esc(p.short || p.name)}</span>` +
+    `<button class="style${p.mine ? " mine-pad" : ""}" data-i="${i}" title="${esc(p.name)}"><span class="n">${esc(p.name)}</span><span class="sn">${esc(p.short || p.name)}</span>` +
     `<span class="m">${p.prog ? "Fundo com acordes · " : ""}Gravado em <span class="k">${p.rec.map(r => KEYS[r.root]).join(" e ")}</span> · ${esc(p.credit)}</span></button>`).join("");
   $("styles").querySelectorAll(".style").forEach(b => b.addEventListener("click", () => togglePad(+b.dataset.i)));
 }
@@ -1007,7 +1141,10 @@ const FUNCS = [
   { id: "stop", name: "Parar", run: () => stop() },
   { id: "modo", name: "Trocar / Somar", run: () => (state.somar ? $("md-trocar") : $("md-somar")).click() },
   { id: "nextpad", name: "Próximo pad (só ele)", run: nextPad },
-  ...PADS.map((p, n) => ({ id: "pad" + n, name: "Liga/desliga: " + p.name, run: () => togglePad(n) })),
+  ...[0, 1, 2, 3, 4, 5, 6, 7].map(n => ({ id: "pad" + n, get name() { return "Liga/desliga: " + (PADS[n] ? PADS[n].name : "pad " + (n + 1)); }, run: () => { if (PADS[n]) togglePad(n); } })),
+  ...[0, 1, 2, 3, 4, 5, 6, 7].map(n => ({ id: "shot" + n, get name() { return "Disparo: " + (window.SHOTS ? SHOTS[n].name : n + 1); }, run: () => fireShot(n) })),
+  { id: "metro", name: "Metrônomo liga/desliga", run: () => metroToggle() },
+  { id: "tap", name: "Metrônomo: bater o tempo", run: () => metroTap() },
   ...PRESETS.map((p, n) => ({ id: "preset" + n, name: "Receita: " + p[0], run: presetBtn(n) })),
 ];
 const DEFAULT_MAP = {
@@ -1239,15 +1376,16 @@ function checkFullscreen() {
 window.addEventListener("resize", checkFullscreen);
 window.addEventListener("orientationchange", () => setTimeout(checkFullscreen, 300));
 checkFullscreen();
+const TABS = ["fx", "shots", "metro", "mine", "scale", "smc"];
 function setTab(t) {
   state.tab = t; save();
-  ["fx", "scale", "smc"].forEach(x => {
+  TABS.forEach(x => {
     $("tab-" + x).hidden = x !== t;
     $("tb-" + x).setAttribute("aria-selected", String(x === t));
   });
 }
 document.querySelectorAll(".tabs [data-tab]").forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
-setTab(["fx", "scale", "smc"].includes(store.tab) ? store.tab : "fx");
+setTab(TABS.includes(store.tab) ? store.tab : "fx");
 $("md-trocar").addEventListener("click", () => {
   state.somar = false; save();
   // voltando para Trocar com vários tons: fica só o último
@@ -1270,6 +1408,474 @@ document.addEventListener("keydown", e => {
 buildStyles();
 buildKeys();
 render();
+</script>
+
+<script>
+// =====================================================================================
+// Parte 2: Meus sons (guardados só neste aparelho), Disparos (efeitos por cima dos pads) e Metrônomo
+// =====================================================================================
+
+// ---------- Banco do aparelho (IndexedDB): os sons da pessoa nunca saem daqui ----------
+const DB = { db: null };
+function dbOpen() {
+  if (DB.db) return Promise.resolve(DB.db);
+  return new Promise((ok, bad) => {
+    let r;
+    try { r = indexedDB.open("pad-noahs", 1); } catch (e) { bad(e); return; }
+    r.onupgradeneeded = () => r.result.createObjectStore("sons", { keyPath: "id" });
+    r.onsuccess = () => { DB.db = r.result; ok(DB.db); };
+    r.onerror = () => bad(r.error);
+  });
+}
+async function dbAll() {
+  const db = await dbOpen();
+  return new Promise((ok, bad) => { const q = db.transaction("sons").objectStore("sons").getAll(); q.onsuccess = () => ok(q.result || []); q.onerror = () => bad(q.error); });
+}
+async function dbPut(rec) {
+  const db = await dbOpen();
+  return new Promise((ok, bad) => { const t = db.transaction("sons", "readwrite"); t.objectStore("sons").put(rec); t.oncomplete = () => ok(); t.onerror = () => bad(t.error); });
+}
+async function dbDel(id) {
+  const db = await dbOpen();
+  return new Promise((ok, bad) => { const t = db.transaction("sons", "readwrite"); t.objectStore("sons").delete(id); t.oncomplete = () => ok(); t.onerror = () => bad(t.error); });
+}
+async function dbGet(id) {
+  const db = await dbOpen();
+  return new Promise((ok, bad) => { const q = db.transaction("sons").objectStore("sons").get(id); q.onsuccess = () => ok(q.result); q.onerror = () => bad(q.error); });
+}
+// dados de um som do aparelho (cópia: o decodificador "gasta" o buffer)
+async function mineData(id) {
+  const r = await dbGet(id);
+  if (!r) throw new Error("som não encontrado neste aparelho");
+  return r.wav.slice(0);
+}
+
+// ---------- Ler o arquivo da pessoa: corta, iguala volume, acha o tom, guarda em WAV ----------
+const MAX_KEEP = 90; // segundos guardados de um pad
+// arquivos longos (ex.: pad de 30 minutos): só o começo vai para o decodificador, para não estourar a memória do celular
+function trimBytes(buf) {
+  const u = new Uint8Array(buf);
+  const tag = String.fromCharCode(u[0], u[1], u[2], u[3]);
+  if (tag === "RIFF" && String.fromCharCode(u[8], u[9], u[10], u[11]) === "WAVE") {
+    const dv = new DataView(buf);
+    let off = 12, byteRate = 0;
+    while (off + 8 <= u.length) {
+      const id = String.fromCharCode(u[off], u[off + 1], u[off + 2], u[off + 3]);
+      const size = dv.getUint32(off + 4, true);
+      if (id === "fmt ") byteRate = dv.getUint32(off + 16, true);
+      if (id === "data") {
+        const keep = Math.min(size, byteRate ? byteRate * (MAX_KEEP + 12) : size);
+        const out = new Uint8Array(off + 8 + keep);
+        out.set(u.subarray(0, off + 8 + keep));
+        const odv = new DataView(out.buffer);
+        odv.setUint32(4, out.length - 8, true);
+        odv.setUint32(off + 4, keep, true);
+        return out.buffer;
+      }
+      off += 8 + size + (size & 1);
+    }
+    return buf;
+  }
+  const isMp3 = tag.startsWith("ID3") || (u[0] === 0xff && (u[1] & 0xe0) === 0xe0);
+  if (isMp3 && u.length > 4.5e6) return buf.slice(0, 4.5e6); // ~4 min a 128 kb/s
+  if (u.length > 60e6) throw new Error("arquivo grande demais (mais de 60 MB): corte um trecho e tente de novo");
+  return buf;
+}
+function decodeCopy(c, ab) { return new Promise((ok, bad) => c.decodeAudioData(ab, ok, bad)); }
+// Tom pelo som (igual ao programa do notebook): as duas notas mais fortes de E1 a B4; se for tônica + quinta, fica a de baixo.
+function detectKey(mono, sr) {
+  const dec = 4, srd = sr / dec, block = 8192, blocks = 24;
+  const total = Math.floor(mono.length / dec);
+  if (total < block) return 0;
+  const x = new Float32Array(block), score = new Array(12).fill(0);
+  for (let b = 0; b < blocks; b++) {
+    const start = Math.floor((total - block) * b / blocks);
+    for (let i = 0; i < block; i++) {
+      let v = 0; const f = (start + i) * dec;
+      for (let j = 0; j < dec; j++) v += mono[Math.min(mono.length - 1, f + j)];
+      x[i] = v / dec;
+    }
+    for (let midi = 28; midi < 72; midi++) {
+      const w = 2 * Math.PI * 440 * Math.pow(2, (midi - 69) / 12) / srd, c = 2 * Math.cos(w);
+      let s1 = 0, s2 = 0;
+      for (let i = 0; i < block; i++) {
+        const win = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / block);
+        const s0 = x[i] * win + c * s1 - s2; s2 = s1; s1 = s0;
+      }
+      score[midi % 12] += s1 * s1 + s2 * s2 - c * s1 * s2;
+    }
+  }
+  const order = [...Array(12).keys()].sort((a, b) => score[b] - score[a]);
+  return order[0] === (order[1] + 7) % 12 ? order[1] : order[0];
+}
+function wav16(chs, sr) {
+  const n = chs[0].length, nc = chs.length, buf = new ArrayBuffer(44 + n * nc * 2), dv = new DataView(buf);
+  const w = (o, t) => { for (let i = 0; i < t.length; i++) dv.setUint8(o + i, t.charCodeAt(i)); };
+  w(0, "RIFF"); dv.setUint32(4, 36 + n * nc * 2, true); w(8, "WAVEfmt "); dv.setUint32(16, 16, true);
+  dv.setUint16(20, 1, true); dv.setUint16(22, nc, true); dv.setUint32(24, sr, true); dv.setUint32(28, sr * nc * 2, true);
+  dv.setUint16(32, nc * 2, true); dv.setUint16(34, 16, true); w(36, "data"); dv.setUint32(40, n * nc * 2, true);
+  let o = 44;
+  for (let i = 0; i < n; i++) for (let c = 0; c < nc; c++) { dv.setInt16(o, Math.max(-1, Math.min(1, chs[c][i])) * 32767, true); o += 2; }
+  return buf;
+}
+function nameFromFile(fn) {
+  let s = fn.replace(/\.[^.]+$/, "").replace(/[_]+/g, " ").replace(/\[[^\]]*\]|\([^)]*\)/g, " ");
+  s = s.split(/\||\bminutos?\b|\bmin\b|\bhoras?\b/i)[0];
+  s = s.replace(/\s+[A-Za-z0-9-]{11}$/, m => /[A-Z]/.test(m) && /\d/.test(m) ? "" : m); // id do YouTube
+  s = s.replace(/^[0-9a-f]{8}-/i, "").replace(/(\s\d+)+$/, "").replace(/\s+/g, " ").trim().replace(/^[-+\s]+|[-+\s]+$/g, "");
+  return (s || "Meu som").slice(0, 28);
+}
+// pad: pula o começo (costuma entrar aos poucos), guarda até 90 s, iguala o volume
+// disparo: o som inteiro (até 20 s), também com volume igualado
+async function readSound(file, kind) {
+  const c = audio();
+  const raw = trimBytes(await file.arrayBuffer());
+  const buf = await decodeCopy(c, raw);
+  const sr = buf.sampleRate;
+  const skip = kind === "pad" && buf.duration > 30 ? 8 : 0;
+  const keep = Math.min(kind === "pad" ? MAX_KEEP : 20, buf.duration - skip);
+  const n = Math.max(1, Math.floor(keep * sr)), off = Math.floor(skip * sr);
+  const chs = [];
+  for (let ch = 0; ch < Math.min(2, buf.numberOfChannels); ch++) chs.push(buf.getChannelData(ch).slice(off, off + n));
+  let sum = 0, peak = 0;
+  chs.forEach(d => { for (let i = 0; i < d.length; i++) { sum += d[i] * d[i]; peak = Math.max(peak, Math.abs(d[i])); } });
+  const rms = Math.sqrt(sum / (n * chs.length));
+  const gain = rms > 1e-5 ? Math.min(Math.pow(10, -18 / 20) / rms, 0.89 / Math.max(peak, 1e-5)) : 1;
+  chs.forEach(d => { for (let i = 0; i < d.length; i++) d[i] *= gain; });
+  const mono = chs.length > 1 ? chs[0].map((v, i) => (v + chs[1][i]) / 2) : chs[0];
+  return { wav: wav16(chs, sr), root: kind === "pad" ? detectKey(mono, sr) : 0, name: nameFromFile(file.name), secs: keep };
+}
+
+// ---------- Meus sons (pads da pessoa) ----------
+let mineRecs = [];
+function minePadEntry(r) {
+  return { id: "u:" + r.id, mine: true, name: r.name, short: r.name.slice(0, 12), credit: "Meu som", rec: [{ blob: r.id, root: r.root }] };
+}
+function syncMinePads() {
+  // tira os pads do aparelho da lista e coloca de novo, na ordem
+  for (let i = PADS.length - 1; i >= 0; i--) if (PADS[i].mine) { PADS.splice(i, 1); buffers.splice(i, 1); loading.splice(i, 1); }
+  mineRecs.filter(r => r.kind === "pad").forEach(r => { PADS.push(minePadEntry(r)); buffers.push(null); loading.push(null); });
+}
+function mineMsg(html) { $("mineMsg").innerHTML = html; }
+function renderMine() {
+  const pads = mineRecs.filter(r => r.kind === "pad");
+  $("mineList").innerHTML = pads.length ? pads.map(r =>
+    `<div class="mine-row" data-id="${r.id}"><input type="text" value="${esc(r.name)}" maxlength="28" aria-label="Nome do som">` +
+    `<select aria-label="Tom do som">${KEYS.map((k, n) => `<option value="${n}"${n === r.root ? " selected" : ""}>${k}</option>`).join("")}</select>` +
+    `<button data-del>Apagar</button></div>`).join("")
+    : `<div class="mine-empty">Nenhum som ainda. Toque em <b>+ Adicionar som</b>.</div>`;
+  $("mineList").querySelectorAll(".mine-row").forEach(row => {
+    const id = row.dataset.id, r = mineRecs.find(x => x.id === id);
+    row.querySelector("input").addEventListener("change", async e => {
+      r.name = e.target.value.trim().slice(0, 28) || "Meu som"; await dbPut(r);
+      const p = PADS.find(x => x.id === "u:" + id); if (p) { p.name = r.name; p.short = r.name.slice(0, 12); }
+      buildStyles(); render(); renderMap();
+    });
+    row.querySelector("select").addEventListener("change", async e => {
+      r.root = +e.target.value; await dbPut(r);
+      const i = PADS.findIndex(x => x.id === "u:" + id);
+      if (i >= 0) { PADS[i].rec[0].root = r.root; if (buffers[i]) buffers[i][0].root = r.root; if (activeKey !== null && state.on.includes(i)) play(activeKey); }
+      buildStyles(); render();
+    });
+    const del = row.querySelector("[data-del]");
+    del.addEventListener("click", async () => {
+      if (!del.classList.contains("danger")) { del.classList.add("danger"); del.textContent = "Apagar mesmo?"; setTimeout(() => { del.classList.remove("danger"); del.textContent = "Apagar"; }, 3000); return; }
+      const i = PADS.findIndex(x => x.id === "u:" + id);
+      if (i >= 0 && state.on.includes(i)) stop();
+      const ids = state.on.map(x => PADS[x].id).filter(x => x !== "u:" + id);
+      await dbDel(id);
+      mineRecs = mineRecs.filter(x => x.id !== id);
+      syncMinePads();
+      state.on = onFromIds(ids); if (!state.on.length) state.on = [0];
+      save(); buildStyles(); render(); renderMine(); renderMap();
+      mineMsg("Apagado deste aparelho.");
+    });
+  });
+}
+$("mineFile").addEventListener("change", async e => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  mineMsg("Lendo <b>" + esc(file.name) + "</b>… (pode levar alguns segundos)");
+  try {
+    const r = await readSound(file, "pad");
+    const rec = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), kind: "pad", name: r.name, root: r.root, wav: r.wav };
+    await dbPut(rec);
+    mineRecs.push(rec);
+    syncMinePads();
+    const ids = state.on.map(x => PADS[x].id);
+    state.on = onFromIds(ids);
+    buildStyles(); render(); renderMine(); renderMap();
+    mineMsg("Pronto: <b>" + esc(rec.name) + "</b> está em <b>" + KEYS[rec.root] + "</b> (achei pelo som; corrija ao lado se precisar). Já aparece nos pads lá em cima.");
+  } catch (err) {
+    mineMsg("Não consegui ler esse arquivo: " + esc((err && err.message) || "formato desconhecido") + ". Tente um MP3 ou WAV.");
+  }
+});
+
+// ---------- Disparos: efeitos curtos por cima dos pads (gerados aqui, sem direito autoral de ninguém) ----------
+const SHOTS = [
+  { id: "riser", name: "Subida", tip: "sobe até o 1" },
+  { id: "revcym", name: "Prato invertido", tip: "cresce até o 1" },
+  { id: "impact", name: "Impacto", tip: "boom no tom" },
+  { id: "down", name: "Queda", tip: "desce e some" },
+  { id: "swell", name: "Swell", tip: "onda no tom" },
+  { id: "whoosh", name: "Whoosh", tip: "vento de lado" },
+  { id: "shine", name: "Brilho", tip: "sino no tom" },
+  { id: "sub", name: "Sub", tip: "grave que cai" },
+];
+window.SHOTS = SHOTS;
+let noiseBuf = null;
+function noise() {
+  if (noiseBuf) return noiseBuf;
+  const len = ctx.sampleRate * 4;
+  noiseBuf = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const d = noiseBuf.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; }
+  return noiseBuf;
+}
+const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
+// tom de agora (o último tocado, senão o do primeiro pad ligado)
+const shotKey = () => activeKey ?? ((PADS[state.on[0]] && PADS[state.on[0]].rec[0].root) || 0);
+function env(g, t, pts) { g.gain.setValueAtTime(0, t); pts.forEach(([dt, v]) => g.gain.linearRampToValueAtTime(v, t + dt)); }
+function noiseSrc(t, dur) { const s = ctx.createBufferSource(); s.buffer = noise(); s.loop = true; s.start(t, Math.random() * 2); s.stop(t + dur + 0.1); return s; }
+function osc(type, f, t, dur) { const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); o.start(t); o.stop(t + dur + 0.1); return o; }
+// som da própria pessoa num botão
+const shotOwn = {};
+async function loadShotOwn() {
+  mineRecs.filter(r => r.kind === "shot").forEach(r => { shotOwn[r.slot] = { rec: r, buf: null }; });
+}
+async function fireShot(n) {
+  wake();
+  const c = audio(), t = c.currentTime + 0.02, k = shotKey(), out = shotBus;
+  const btn = $("shotgrid").querySelector(`[data-s="${n}"]`);
+  if (btn) { btn.classList.add("hit"); setTimeout(() => btn.classList.remove("hit"), 220); }
+  const own = shotOwn[n];
+  if (own) {
+    if (!own.buf) own.buf = await decodeCopy(c, own.rec.wav.slice(0));
+    const s = c.createBufferSource(); s.buffer = own.buf; s.connect(out); s.start(t);
+    return;
+  }
+  const id = SHOTS[n].id;
+  // Subida e Prato invertido: com o metrônomo ligado, terminam no próximo "1" (pelo menos 1 compasso à frente)
+  const toOne = (minBeats, fallback) => {
+    if (!metro.on) return fallback;
+    const end = metroNextDownbeat(t + minBeats * metroBeatDur());
+    return Math.max(0.5, end - t);
+  };
+  if (id === "riser") {
+    const d = toOne(metroBeatsPerBar(), 4);
+    const n1 = noiseSrc(t, d), bp = c.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 3;
+    bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(9000, t + d);
+    const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.5, t + d); g.gain.linearRampToValueAtTime(0, t + d + 0.04);
+    n1.connect(bp).connect(g).connect(out);
+    [0, 7].forEach(iv => {
+      const o = osc("sawtooth", midiHz(36 + k + iv), t, d), lp = c.createBiquadFilter(), og = c.createGain();
+      o.frequency.exponentialRampToValueAtTime(midiHz(60 + k + iv), t + d);
+      lp.type = "lowpass"; lp.frequency.setValueAtTime(300, t); lp.frequency.exponentialRampToValueAtTime(5000, t + d);
+      og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(0.08, t + d); og.gain.linearRampToValueAtTime(0, t + d + 0.04);
+      o.connect(lp).connect(og).connect(out);
+    });
+  } else if (id === "revcym") {
+    const d = toOne(2, 2.2);
+    const n1 = noiseSrc(t, d), hp = c.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 4500;
+    const g = c.createGain(); const curve = new Float32Array(64).map((_, i) => Math.pow(i / 63, 3.2) * 0.7);
+    g.gain.setValueCurveAtTime(curve, t, d); g.gain.setValueAtTime(0.7, t + d); g.gain.linearRampToValueAtTime(0, t + d + 0.05);
+    n1.connect(hp).connect(g).connect(out);
+  } else if (id === "impact") {
+    const f = midiHz(28 + ((k - 4 + 12) % 12));
+    const o = osc("sine", f * 2, t, 2.5), g = c.createGain();
+    o.frequency.exponentialRampToValueAtTime(f, t + 0.15);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.6, t + 0.01); g.gain.exponentialRampToValueAtTime(0.001, t + 2.4);
+    o.connect(g).connect(out);
+    const n1 = noiseSrc(t, 0.6), lp = c.createBiquadFilter(), ng = c.createGain(); lp.type = "lowpass"; lp.frequency.value = 1800;
+    ng.gain.setValueAtTime(0.5, t); ng.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+    n1.connect(lp).connect(ng).connect(out);
+  } else if (id === "down") {
+    const d = 3, n1 = noiseSrc(t, d), bp = c.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 2;
+    bp.frequency.setValueAtTime(8000, t); bp.frequency.exponentialRampToValueAtTime(200, t + d);
+    const g = c.createGain(); g.gain.setValueAtTime(0.45, t); g.gain.exponentialRampToValueAtTime(0.001, t + d);
+    n1.connect(bp).connect(g).connect(out);
+    const o = osc("sine", midiHz(60 + k), t, d), og = c.createGain();
+    o.frequency.exponentialRampToValueAtTime(midiHz(36 + k), t + d);
+    og.gain.setValueAtTime(0.12, t); og.gain.exponentialRampToValueAtTime(0.001, t + d); o.connect(og).connect(out);
+  } else if (id === "swell") {
+    const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.setValueAtTime(400, t); lp.frequency.exponentialRampToValueAtTime(4000, t + 2.5); lp.frequency.exponentialRampToValueAtTime(600, t + 5);
+    const g = c.createGain(); env(g, t, [[2.5, 0.22], [5, 0]]);
+    [0, 7, 12, 19].forEach((iv, j) => { [-6, 6].forEach(cents => { const o = osc(j % 2 ? "triangle" : "sawtooth", midiHz(48 + k + iv), t, 5); o.detune.value = cents; o.connect(lp); }); });
+    lp.connect(g).connect(out);
+  } else if (id === "whoosh") {
+    const d = 1.3, n1 = noiseSrc(t, d), bp = c.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 1.5;
+    bp.frequency.setValueAtTime(400, t); bp.frequency.exponentialRampToValueAtTime(5000, t + d * 0.6); bp.frequency.exponentialRampToValueAtTime(800, t + d);
+    const pan = c.createStereoPanner(); pan.pan.setValueAtTime(-1, t); pan.pan.linearRampToValueAtTime(1, t + d);
+    const g = c.createGain(); env(g, t, [[d * 0.6, 0.6], [d, 0]]);
+    n1.connect(bp).connect(g).connect(pan).connect(out);
+  } else if (id === "shine") {
+    [0, 7, 12].forEach((iv, j) => {
+      const t0 = t + j * 0.08, f = midiHz(72 + k + iv);
+      [[1, 0.25], [2.76, 0.08], [5.4, 0.04]].forEach(([m, a]) => {
+        const o = osc("sine", f * m, t0, 3.5), g = c.createGain();
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(a, t0 + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 3.4 / m);
+        o.connect(g).connect(out);
+      });
+    });
+  } else if (id === "sub") {
+    const f = midiHz(28 + ((k - 4 + 12) % 12)), o = osc("sine", f * 4, t, 2), g = c.createGain();
+    o.frequency.exponentialRampToValueAtTime(f, t + 1.6);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.5, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + 1.9);
+    o.connect(g).connect(out);
+  }
+}
+function buildShots() {
+  $("shotgrid").innerHTML = SHOTS.map((sh, n) =>
+    `<button class="shot${shotOwn[n] ? " own" : ""}" data-s="${n}"><span>${esc(shotOwn[n] ? shotOwn[n].rec.name : sh.name)}</span><small>${esc(shotOwn[n] ? sh.name : sh.tip)}</small></button>`).join("");
+  $("shotgrid").querySelectorAll(".shot").forEach(b => b.addEventListener("pointerdown", e => { e.preventDefault(); fireShot(+b.dataset.s); }));
+  $("shotSlot").innerHTML = SHOTS.map((sh, n) => `<option value="${n}">${n + 1} · ${esc(sh.name)}</option>`).join("");
+}
+$("shotVol").value = Math.round((typeof state.shotVol === "number" ? state.shotVol : 0.8) * 100);
+$("shotVolOut").textContent = $("shotVol").value + "%";
+$("shotVol").addEventListener("input", e => {
+  state.shotVol = e.target.value / 100; save(); $("shotVolOut").textContent = e.target.value + "%";
+  if (shotBus) shotBus.gain.setTargetAtTime(state.shotVol, ctx.currentTime, 0.05);
+});
+$("shotFile").addEventListener("change", async e => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  const slot = +$("shotSlot").value;
+  $("shotMsg").textContent = "Lendo " + file.name + "…";
+  try {
+    const r = await readSound(file, "shot");
+    if (shotOwn[slot]) await dbDel(shotOwn[slot].rec.id);
+    const rec = { id: "s" + slot + "-" + Date.now().toString(36), kind: "shot", slot, name: r.name.slice(0, 14), root: 0, wav: r.wav };
+    await dbPut(rec);
+    mineRecs = mineRecs.filter(x => !(x.kind === "shot" && x.slot === slot)); mineRecs.push(rec);
+    shotOwn[slot] = { rec, buf: null };
+    buildShots(); renderMap();
+    $("shotMsg").textContent = "Pronto: o botão " + (slot + 1) + " agora toca " + rec.name + ". Fica só neste aparelho.";
+  } catch (err) {
+    $("shotMsg").textContent = "Não consegui ler esse arquivo: " + ((err && err.message) || "formato desconhecido");
+  }
+});
+$("shotReset").addEventListener("click", async () => {
+  const slot = +$("shotSlot").value;
+  if (!shotOwn[slot]) return;
+  await dbDel(shotOwn[slot].rec.id);
+  mineRecs = mineRecs.filter(x => !(x.kind === "shot" && x.slot === slot));
+  delete shotOwn[slot];
+  buildShots(); renderMap();
+  $("shotMsg").textContent = "O botão " + (slot + 1) + " voltou ao som original.";
+});
+
+// ---------- Metrônomo (agendado no relógio do áudio: não atrasa mesmo com a tela ocupada) ----------
+const metro = Object.assign({ bpm: 80, sig: 4, vol: 0.7, split: false }, store.metro || {}, { on: false });
+let metroTimer = null, metroNext = 0, metroBeat = 0, metroBarStart = 0, clickBus = null, clickPan = null;
+const metroBeatsPerBar = () => metro.sig;
+const metroBeatDur = () => 60 / metro.bpm;
+function metroSave() { state.metro = { bpm: metro.bpm, sig: metro.sig, vol: metro.vol, split: metro.split }; save(); }
+function metroOut() {
+  if (clickBus) return clickBus;
+  audio();
+  clickBus = ctx.createGain(); clickBus.gain.value = metro.vol;
+  clickPan = ctx.createStereoPanner();
+  clickBus.connect(clickPan).connect(ctx.destination); // o click não passa no reverb nem nos efeitos
+  metroApplySplit();
+  return clickBus;
+}
+function metroApplySplit() {
+  if (!clickPan) return;
+  const t = ctx.currentTime;
+  clickPan.pan.setTargetAtTime(metro.split ? -1 : 0, t, 0.02);
+  padPan.pan.setTargetAtTime(metro.split ? 1 : 0, t, 0.02);
+}
+function click(t, level) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.value = level === 2 ? 1760 : level === 1 ? 1320 : 990;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(level === 2 ? 0.9 : 0.55, t + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+  o.connect(g).connect(clickBus); o.start(t); o.stop(t + 0.06);
+}
+function metroTick() {
+  const ahead = ctx.currentTime + 0.12;
+  while (metroNext < ahead) {
+    const inBar = metroBeat % metro.sig;
+    if (inBar === 0) metroBarStart = metroNext;
+    // 1º tempo forte; no 6/8 o 4º também é meio forte
+    click(metroNext, inBar === 0 ? 2 : (metro.sig === 6 && inBar === 3 ? 1 : 0));
+    const when = (metroNext - ctx.currentTime) * 1000, b = inBar;
+    setTimeout(() => metroShowBeat(b), Math.max(0, when));
+    metroNext += metroBeatDur();
+    metroBeat++;
+  }
+}
+// próximo "1" do compasso depois do instante t
+function metroNextDownbeat(t) {
+  const bar = metro.sig * metroBeatDur();
+  let x = metroBarStart;
+  while (x < t) x += bar;
+  return x;
+}
+function metroShowBeat(b) {
+  if (!metro.on) return;
+  document.querySelectorAll("#beats span").forEach((el, i) => el.classList.toggle("now", i === b));
+  const m = $("metroMini"); m.classList.add("beat"); m.classList.toggle("acc", b === 0);
+  clearTimeout(metroShowBeat.t); metroShowBeat.t = setTimeout(() => m.classList.remove("beat", "acc"), 90);
+}
+function metroStart() {
+  wake(); metroOut();
+  metro.on = true; metroBeat = 0; metroNext = ctx.currentTime + 0.06; metroBarStart = metroNext;
+  metroTimer = setInterval(metroTick, 25); metroTick();
+  renderMetro();
+}
+function metroStop() {
+  metro.on = false; clearInterval(metroTimer); metroTimer = null;
+  document.querySelectorAll("#beats span").forEach(el => el.classList.remove("now"));
+  renderMetro();
+}
+function metroToggle() { metro.on ? metroStop() : metroStart(); }
+function metroSetBpm(v) {
+  metro.bpm = Math.max(40, Math.min(220, Math.round(v)));
+  metroSave(); renderMetro();
+}
+let taps = [];
+function metroTap() {
+  const now = performance.now();
+  taps = taps.filter(x => now - x < 2500); taps.push(now);
+  if (taps.length >= 2) {
+    const iv = []; for (let i = 1; i < taps.length; i++) iv.push(taps[i] - taps[i - 1]);
+    metroSetBpm(60000 / (iv.slice(-4).reduce((a, b) => a + b, 0) / Math.min(4, iv.length)));
+  }
+}
+function renderMetro() {
+  $("bpmVal").textContent = metro.bpm; $("bpm").value = metro.bpm;
+  $("metroGo").textContent = metro.on ? "■ Desligar" : "▶ Ligar"; $("metroGo").classList.toggle("on", metro.on);
+  document.querySelectorAll("[data-sig]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.sig === metro.sig)));
+  $("beats").innerHTML = Array.from({ length: metro.sig }, (_, i) => `<span class="${i === 0 || (metro.sig === 6 && i === 3) ? "acc" : ""}"></span>`).join("");
+  $("clickVol").value = Math.round(metro.vol * 100); $("clickVolOut").textContent = $("clickVol").value + "%";
+  $("clickSplit").checked = metro.split;
+  $("metroMini").classList.toggle("on", metro.on);
+}
+$("metroGo").addEventListener("click", metroToggle);
+$("metroTap").addEventListener("click", metroTap);
+$("bpmMinus").addEventListener("click", () => metroSetBpm(metro.bpm - 1));
+$("bpmPlus").addEventListener("click", () => metroSetBpm(metro.bpm + 1));
+$("bpm").addEventListener("input", e => metroSetBpm(+e.target.value));
+document.querySelectorAll("[data-sig]").forEach(b => b.addEventListener("click", () => { metro.sig = +b.dataset.sig; metroSave(); renderMetro(); }));
+$("clickVol").addEventListener("input", e => {
+  metro.vol = e.target.value / 100; metroSave(); $("clickVolOut").textContent = e.target.value + "%";
+  if (clickBus) clickBus.gain.setTargetAtTime(metro.vol, ctx.currentTime, 0.03);
+});
+$("clickSplit").addEventListener("change", e => { metro.split = e.target.checked; metroSave(); if (clickBus) metroApplySplit(); else if (padPan && ctx) padPan.pan.value = metro.split ? 1 : 0; });
+
+// ---------- Começo ----------
+buildShots();
+renderMetro();
+renderMine();
+dbAll().then(recs => {
+  mineRecs = recs;
+  loadShotOwn();
+  syncMinePads();
+  // pads do aparelho que estavam ligados da última vez
+  if (Array.isArray(store.onIds)) { const on = onFromIds(store.onIds); if (on.length) state.on = on; }
+  buildStyles(); render(); renderMine(); buildShots(); renderMap();
+}).catch(() => { mineMsg("Este navegador não deixou guardar sons neste aparelho (modo privado?)."); });
 </script>
 
 </body></html>
