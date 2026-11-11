@@ -114,6 +114,17 @@ button.small:hover { background: var(--card-hi); }
 .smc-map { display: grid; gap: 4px; padding-top: 8px; font-size: .86rem; color: var(--dim); }
 .smc-map b { color: var(--fg); font-weight: 600; }
 
+.smc-last { font-size: .86rem; color: var(--dim); }
+.smc-last b { color: var(--fg); }
+.smc-tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding-top: 10px; }
+.smc-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) auto auto; gap: 8px; align-items: center;
+  padding: 6px 0; border-top: 1px solid var(--line); }
+.smc-row .fn { color: var(--fg); font-weight: 600; font-size: .88rem; min-width: 0; }
+.smc-row .src { color: var(--dim); font-size: .82rem; min-width: 0; overflow-wrap: anywhere; }
+.smc-row button { border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 8px; padding: 6px 10px; font: 600 .8rem var(--f-body); cursor: pointer; }
+.smc-row button.learning { background: var(--warm); color: #2a1a00; border-color: var(--warm); }
+.smc-row.flash { background: color-mix(in srgb, var(--pad) 18%, transparent); }
+
 /* Efeitos */
 .fx { background: var(--bg2); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 12px; }
 .fx .head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
@@ -289,16 +300,14 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
       <button class="small" id="smcConnect">Conectar mesinha</button>
     </div>
     <p class="hint" id="smcHelp">No iPhone: abra esta página no app <b>Web MIDI Browser</b>, pareie a SMC por Bluetooth nele e toque em "Conectar mesinha". No computador ou Android: Chrome ou Edge.</p>
-    <details>
-      <summary>O que cada controle da mesinha faz</summary>
-      <div class="smc-map">
-        <div><b>Fader 7</b> volume do pad · <b>Fader 8 / master</b> volume</div>
-        <div><b>Faders 1–6</b> reverb · cutoff · oitava acima · oitava abaixo · movimento · eco</div>
-        <div><b>Knob 7</b> escolhe o tom · <b>Knob 8</b> cutoff · <b>Knob 1</b> respiração · <b>Knob 2</b> tempo de troca</div>
-        <div><b>MUTE 1–4</b> liga/desliga os pads 1–4 · <b>MUTE 7</b> parar · <b>MUTE 8</b> Trocar/Somar</div>
-        <div><b>SOLO 1–4</b> receitas Limpo · Celestial · Profundo · Oração · <b>SOLO 7</b> próximo pad</div>
-        <div><b>◀◀ ▶▶ / setas ◀ ▶</b> tom anterior/próximo · <b>▶</b> toca · <b>■</b> parar</div>
+    <div class="smc-last">Último controle mexido: <b id="smcLast">—</b></div>
+    <details id="smcDetails">
+      <summary>Mapeador: o que cada controle da mesinha faz (toque em Aprender e mexa o controle)</summary>
+      <div class="smc-tools">
+        <span class="hint" id="smcLearnHint">Toque em <b>Aprender</b> numa função e mexa o fader, knob ou botão da mesinha.</span>
+        <button class="small" id="smcReset">Voltar ao padrão</button>
       </div>
+      <div class="smc-map" id="smcMap"></div>
     </details>
   </section>
 
@@ -871,11 +880,11 @@ function syncFxInputs() {
 }
 buildFx();
 
-// ---------- Mesinha SMC-Mixer (Web MIDI) — mesmo padrão Mackie do programa do notebook ----------
+// ---------- Mesinha SMC-Mixer (Web MIDI) com mapeador ----------
 // Funciona onde o navegador tem Web MIDI: Chrome/Edge no computador e Android, e o app Web MIDI Browser no iPhone.
-// Dentro da página do Claude o acesso a aparelhos é bloqueado: lá aparece o aviso.
+// Cada função tem um ou mais controles ("fontes"): "pb:<canal>" (fader), "cc:<canal>:<num>:r|a" (knob relativo/absoluto),
+// "note:<canal>:<num>" (botão). O padrão é o Mackie da SMC, igual ao programa do notebook; o Theo pode trocar com "Aprender".
 let midiAccess = null;
-let knobAcc = 0;
 function setSlider(id, v01) {
   const el = $(id), lo = +el.min, hi = +el.max;
   el.value = Math.round(lo + Math.min(1, Math.max(0, v01)) * (hi - lo));
@@ -885,62 +894,188 @@ function nudgeSlider(id, ticks) {
   const el = $(id), lo = +el.min, hi = +el.max;
   setSlider(id, (+el.value - lo) / (hi - lo) + ticks * 0.02);
 }
-const FADERS = ["rev", "cut", "fx-up", "fx-down", "fx-motion", "fx-echo"]; // faders 1–6
+const presetBtn = n => () => $("presets").querySelector(`[data-p="${n}"]`).click();
+const nextPad = () => {
+  const n = (state.on[state.on.length - 1] + 1) % PADS.length;
+  state.on = [n]; save();
+  if (activeKey !== null) play(activeKey); else render();
+};
+// funções que dá para ligar à mesinha
+const FUNCS = [
+  { id: "vol", name: "Volume do pad", slider: "vol" },
+  { id: "rev", name: "Reverb de igreja", slider: "rev" },
+  { id: "cut", name: "Cutoff", slider: "cut" },
+  { id: "up", name: "Oitava acima", slider: "fx-up" },
+  { id: "down", name: "Oitava abaixo", slider: "fx-down" },
+  { id: "motion", name: "Movimento", slider: "fx-motion" },
+  { id: "breath", name: "Respiração", slider: "fx-breath" },
+  { id: "echo", name: "Eco", slider: "fx-echo" },
+  { id: "fade", name: "Tempo de troca", slider: "fx-fade" },
+  { id: "tom", name: "Escolher o tom (girar)", tom: true },
+  { id: "prev", name: "Tom anterior", run: () => step(-1) },
+  { id: "next", name: "Próximo tom", run: () => step(1) },
+  { id: "play", name: "Tocar", run: () => play(activeKey ?? PADS[state.on[0]].rec[0].root) },
+  { id: "stop", name: "Parar", run: () => stop() },
+  { id: "modo", name: "Trocar / Somar", run: () => (state.somar ? $("md-trocar") : $("md-somar")).click() },
+  { id: "nextpad", name: "Próximo pad (só ele)", run: nextPad },
+  ...PADS.map((p, n) => ({ id: "pad" + n, name: "Liga/desliga: " + p.name, run: () => togglePad(n) })),
+  ...PRESETS.map((p, n) => ({ id: "preset" + n, name: "Receita: " + p[0], run: presetBtn(n) })),
+];
+const DEFAULT_MAP = {
+  vol: ["pb:6", "pb:7", "pb:8"], rev: ["pb:0"], cut: ["pb:1", "cc:0:23:r"], up: ["pb:2"], down: ["pb:3"],
+  motion: ["pb:4"], echo: ["pb:5"], breath: ["cc:0:16:r"], fade: ["cc:0:17:r"], tom: ["cc:0:22:r"],
+  prev: ["note:0:91", "note:0:98", "note:0:46"], next: ["note:0:92", "note:0:99", "note:0:47"],
+  play: ["note:0:94"], stop: ["note:0:22", "note:0:93"], modo: ["note:0:23"], nextpad: ["note:0:14"],
+  pad0: ["note:0:16"], pad1: ["note:0:17"], pad2: ["note:0:18"], pad3: ["note:0:19"],
+  preset0: ["note:0:8"], preset1: ["note:0:9"], preset2: ["note:0:10"], preset3: ["note:0:11"],
+};
+let smcMap = {};
+try { smcMap = JSON.parse(localStorage.getItem("smcmap") || "null") || {}; } catch (e) { smcMap = {}; }
+if (!Object.keys(smcMap).length) smcMap = JSON.parse(JSON.stringify(DEFAULT_MAP));
+const saveMap = () => { try { localStorage.setItem("smcmap", JSON.stringify(smcMap)); } catch (e) {} };
+let learning = null;
+
+// nome do controle, do jeito que está escrito na SMC
+const NOTE_NAMES = { 91: "◀◀", 92: "▶▶", 93: "■", 94: "▶", 95: "●", 46: "Bank ◀", 47: "Bank ▶", 48: "Canal ◀", 49: "Canal ▶",
+  98: "Seta ◀", 99: "Seta ▶", 96: "Seta ▲", 97: "Seta ▼" };
+function srcName(src) {
+  const [t, a, b, mode] = src.split(":");
+  const ch = +a, n = +b;
+  if (t === "pb") return ch === 8 ? "Fader master" : "Fader " + (ch + 1) + (ch > 8 ? " (canal " + (ch + 1) + ")" : "");
+  if (t === "cc") return (mode === "r" && n >= 16 && n <= 23 && ch === 0) ? "Knob " + (n - 15) : "CC " + n + (mode === "r" ? " (gira)" : "") + (ch ? " canal " + (ch + 1) : "");
+  if (ch === 0) {
+    if (n <= 7) return "REC " + (n + 1);
+    if (n <= 15) return "SOLO " + (n - 7);
+    if (n <= 23) return "MUTE " + (n - 15);
+    if (n <= 31) return "SELECT " + (n - 23);
+    if (NOTE_NAMES[n]) return NOTE_NAMES[n];
+  }
+  return "Botão (nota " + n + (ch ? ", canal " + (ch + 1) : "") + ")";
+}
+
+function renderMap() {
+  $("smcMap").innerHTML = FUNCS.map(f => {
+    const srcs = (smcMap[f.id] || []).map(srcName).join(" · ") || "<i>nenhum</i>";
+    return `<div class="smc-row" data-f="${f.id}"><span class="fn">${esc(f.name)}</span><span class="src">${srcs}</span>` +
+      `<button data-learn="${f.id}" class="${learning === f.id ? "learning" : ""}">${learning === f.id ? "Mexa agora…" : "Aprender"}</button>` +
+      `<button data-clear="${f.id}" aria-label="Tirar o controle de ${esc(f.name)}">✕</button></div>`;
+  }).join("");
+  $("smcMap").querySelectorAll("[data-learn]").forEach(b => b.addEventListener("click", () => {
+    learning = learning === b.dataset.learn ? null : b.dataset.learn;
+    $("smcLearnHint").innerHTML = learning ? "Agora mexa na mesinha o controle para <b>" + esc(FUNCS.find(f => f.id === learning).name) + "</b>." : "Toque em <b>Aprender</b> numa função e mexa o fader, knob ou botão da mesinha.";
+    renderMap();
+  }));
+  $("smcMap").querySelectorAll("[data-clear]").forEach(b => b.addEventListener("click", () => {
+    smcMap[b.dataset.clear] = []; saveMap(); renderMap();
+  }));
+}
+$("smcReset").addEventListener("click", () => { smcMap = JSON.parse(JSON.stringify(DEFAULT_MAP)); learning = null; saveMap(); renderMap(); });
+
 function smcBlink() {
   const d = $("smcDot"); d.classList.add("blink");
   clearTimeout(smcBlink.t); smcBlink.t = setTimeout(() => d.classList.remove("blink"), 120);
 }
-function onMidi(e) {
-  const [st, d1 = 0, d2 = 0] = e.data;
+
+// Mensagem da mesinha → { src, val } (val: 0..1 para fader/CC absoluto, cliques para knob, true para botão apertado)
+function parseMidi(data) {
+  const st = data[0], d1 = data[1] || 0, d2 = data[2] || 0;
   const type = st & 0xf0, ch = st & 0x0f;
-  smcBlink();
-  if (type === 0xe0) { // fader (pitch bend)
-    const v = ((d2 << 7) | d1) / 16383;
-    if (ch < 6) setSlider(FADERS[ch], v);
-    else setSlider("vol", v); // fader 7 = volume do pad; 8 e master = volume
-  } else if (type === 0xb0 && d1 >= 16 && d1 <= 23) { // knobs (relativos)
-    const t = d2 < 64 ? d2 : -(d2 - 64);
-    const k = d1 - 16;
-    if (k === 6) { // knob 7 = escolhe o tom (2 cliques = 1 tom)
-      knobAcc += t;
-      while (Math.abs(knobAcc) >= 2) { step(knobAcc > 0 ? 1 : -1); knobAcc -= 2 * Math.sign(knobAcc); }
-    } else if (k === 7) nudgeSlider("cut", t);
-    else if (k === 0) nudgeSlider("fx-breath", t);
-    else if (k === 1) nudgeSlider("fx-fade", t);
-  } else if (type === 0x90 && d2 > 0) { // botões (só ao apertar)
-    if (d1 >= 16 && d1 <= 19 && d1 - 16 < PADS.length) togglePad(d1 - 16);       // MUTE 1–4
-    else if (d1 >= 8 && d1 <= 11) $("presets").querySelector(`[data-p="${d1 - 8}"]`).click(); // SOLO 1–4
-    else if (d1 === 22 || d1 === 93) stop();                                       // MUTE 7, ■
-    else if (d1 === 23) (state.somar ? $("md-trocar") : $("md-somar")).click();    // MUTE 8
-    else if (d1 === 14) { const n = (state.on[state.on.length - 1] + 1) % PADS.length; state.on = [n]; save(); if (activeKey !== null) play(activeKey); else render(); } // SOLO 7
-    else if (d1 === 91 || d1 === 98 || d1 === 46) step(-1);
-    else if (d1 === 92 || d1 === 99 || d1 === 47) step(1);
-    else if (d1 === 94) play(activeKey ?? PADS[state.on[0]].rec[0].root);
+  if (type === 0xe0) return { src: "pb:" + ch, abs: ((d2 << 7) | d1) / 16383 };
+  if (type === 0xb0) {
+    const rel = (d2 >= 1 && d2 <= 15) || (d2 >= 65 && d2 <= 79);
+    return { src: `cc:${ch}:${d1}:${rel ? "r" : "a"}`, alt: `cc:${ch}:${d1}:${rel ? "a" : "r"}`, abs: d2 / 127, ticks: d2 < 64 ? d2 : -(d2 - 64), press: d2 > 63 };
   }
+  if (type === 0x90 && d2 > 0) return { src: `note:${ch}:${d1}`, press: true };
+  return null; // soltar botão, etc.
+}
+
+let knobAcc = 0;
+function runFunc(f, m) {
+  const isRel = m.src.endsWith(":r");
+  if (f.slider) {
+    if (m.src.startsWith("pb:") || (m.src.startsWith("cc:") && !isRel)) setSlider(f.slider, m.abs);
+    else if (isRel) nudgeSlider(f.slider, m.ticks);
+  } else if (f.tom) {
+    if (isRel) {
+      knobAcc += m.ticks;
+      while (Math.abs(knobAcc) >= 2) { step(knobAcc > 0 ? 1 : -1); knobAcc -= 2 * Math.sign(knobAcc); }
+    } else if (m.abs !== undefined) {
+      const k = Math.min(11, Math.floor(m.abs * 12));
+      if (k !== activeKey) play(k);
+    } else if (m.press) step(1);
+  } else if (f.run && m.press) {
+    f.run();
+  }
+}
+
+function onMidi(e) {
+  const m = parseMidi(e.data);
+  smcBlink();
+  if (!m) return;
+  $("smcLast").textContent = srcName(m.src);
+  if (learning) {
+    // um controle só faz uma coisa: sai das outras funções
+    Object.keys(smcMap).forEach(k => { smcMap[k] = (smcMap[k] || []).filter(x => x !== m.src && x !== m.alt); });
+    smcMap[learning] = [m.src];
+    const done = learning;
+    learning = null; saveMap(); renderMap();
+    $("smcLearnHint").innerHTML = "Pronto: <b>" + esc(srcName(m.src)) + "</b> agora faz <b>" + esc(FUNCS.find(f => f.id === done).name) + "</b>.";
+    const row = $("smcMap").querySelector(`[data-f="${done}"]`); if (row) { row.classList.add("flash"); setTimeout(() => row.classList.remove("flash"), 900); }
+    return;
+  }
+  FUNCS.forEach(f => {
+    const srcs = smcMap[f.id] || [];
+    if (srcs.includes(m.src) || (m.alt && srcs.includes(m.alt) && !m.src.startsWith("note"))) {
+      // um knob aprendido como "gira" pode mandar um valor que parece absoluto (e vice-versa): usa o tipo aprendido
+      runFunc(f, srcs.includes(m.src) ? m : { ...m, src: m.alt });
+    }
+  });
+}
+
+// lista de entradas MIDI de jeito que funciona no Chrome e nos navegadores de iPhone (Map ou objeto)
+function midiInputs() {
+  const list = [];
+  const ins = midiAccess && midiAccess.inputs;
+  if (!ins) return list;
+  if (typeof ins.forEach === "function") ins.forEach(i => list.push(i));
+  else if (typeof ins.values === "function") { for (const i of ins.values()) list.push(i); }
+  else Object.keys(ins).forEach(k => list.push(ins[k]));
+  return list;
 }
 function smcRefresh() {
   if (!midiAccess) return;
-  const ins = [...midiAccess.inputs.values()].filter(i => i.state !== "disconnected");
-  ins.forEach(i => { i.onmidimessage = onMidi; });
+  let ins = [];
+  try { ins = midiInputs().filter(i => i && i.state !== "disconnected"); } catch (e) { ins = []; }
+  ins.forEach(i => {
+    try { i.onmidimessage = onMidi; } catch (e) {}
+  });
   $("smcDot").classList.toggle("ok", ins.length > 0);
-  $("smcStatus").textContent = ins.length ? "conectada: " + ins.map(i => i.name).join(", ") : "nenhum aparelho MIDI (pareie a SMC e toque em Conectar)";
+  $("smcStatus").textContent = ins.length ? "conectada: " + ins.map(i => i.name || "aparelho MIDI").join(", ") : "nenhum aparelho MIDI ainda (pareie a SMC no app e toque em Conectar)";
 }
 async function smcConnect() {
   if (!navigator.requestMIDIAccess) {
     $("smcStatus").textContent = "este navegador não tem MIDI";
-    $("smcHelp").innerHTML = "Este navegador não deixa a página falar com a mesinha. No iPhone use o app <b>Web MIDI Browser</b>; no computador ou Android, Chrome ou Edge. (Dentro do Claude não funciona.)";
+    $("smcHelp").innerHTML = "Este navegador não deixa a página falar com a mesinha. No iPhone use o app <b>Web MIDI Browser</b>; no computador ou Android, Chrome ou Edge. (Dentro da página do Claude não funciona.)";
     return;
   }
+  let access;
   try {
-    midiAccess = await navigator.requestMIDIAccess({ sysex: false });
-    midiAccess.onstatechange = smcRefresh;
-    smcRefresh();
+    access = await navigator.requestMIDIAccess();
   } catch (err) {
-    $("smcStatus").textContent = "o navegador não deixou (" + (err && err.name || "bloqueado") + ")";
-    $("smcHelp").innerHTML = "O acesso à mesinha foi bloqueado. Dentro do Claude isso é normal: abra a cópia da página no app <b>Web MIDI Browser</b> (iPhone) ou no Chrome.";
+    $("smcStatus").textContent = "não deixou: " + ((err && (err.message || err.name)) || "bloqueado");
+    $("smcHelp").innerHTML = location.hostname.endsWith("claude.ai") || location.hostname.includes("claudeusercontent")
+      ? "Dentro da página do Claude o acesso à mesinha é bloqueado. Use o seu link secreto no app <b>Web MIDI Browser</b> (iPhone) ou no Chrome."
+      : "O navegador recusou o acesso à mesinha. Confira se o app tem permissão de Bluetooth e toque em Conectar de novo.";
+    return;
   }
+  midiAccess = access;
+  try { midiAccess.onstatechange = smcRefresh; } catch (e) {}
+  try { smcRefresh(); } catch (err) { $("smcStatus").textContent = "conectei, mas deu erro lendo os aparelhos: " + (err && err.message); }
+  // alguns apps só listam o aparelho Bluetooth um instante depois
+  setTimeout(() => { try { smcRefresh(); } catch (e) {} }, 1500);
 }
 $("smcConnect").addEventListener("click", smcConnect);
+renderMap();
 // se já deu permissão antes, conecta sozinho
 try { if (navigator.permissions && navigator.requestMIDIAccess) navigator.permissions.query({ name: "midi" }).then(r => { if (r.state === "granted") smcConnect(); }).catch(() => {}); } catch (e) {}
 function setEstilo(e) {
