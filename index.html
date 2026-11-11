@@ -303,6 +303,10 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
   [data-estilo="estudio"] .style { padding: 6px 10px; }
   [data-estilo="estudio"] .bar .status { font-size: .74rem; }
 }
+/* Tela cheia no iPhone: o conteúdo desce para baixo do Dynamic Island / entalhe (e do botão flutuante do app) */
+html.fs body { padding-top: max(env(safe-area-inset-top, 0px), 92px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px); }
+html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px), 56px); padding-right: max(16px, env(safe-area-inset-right, 0px), 56px); }
 </style>
 
 <div class="wrap">
@@ -1188,6 +1192,17 @@ $("cut").addEventListener("input", e => {
   if (filter) filter.frequency.setTargetAtTime(Math.min(cutHz(state.cut), ctx.sampleRate * 0.45), ctx.currentTime, 0.04);
 });
 $("stop").addEventListener("click", stop);
+// Tela cheia (página ocupa a tela toda do celular): liga o espaço para o Dynamic Island
+function checkFullscreen() {
+  const land = window.innerWidth > window.innerHeight;
+  const full = Math.max(screen.width, screen.height), short = Math.min(screen.width, screen.height);
+  const isFs = /iPhone|iPad|iPod/.test(navigator.userAgent) && (land ? window.innerHeight >= short - 2 : window.innerHeight >= full - 2);
+  document.documentElement.classList.toggle("fs", isFs);
+  document.documentElement.classList.toggle("landscape", land);
+}
+window.addEventListener("resize", checkFullscreen);
+window.addEventListener("orientationchange", () => setTimeout(checkFullscreen, 300));
+checkFullscreen();
 function setTab(t) {
   state.tab = t; save();
   ["fx", "scale", "smc"].forEach(x => {
