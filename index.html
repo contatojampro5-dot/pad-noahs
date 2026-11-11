@@ -115,6 +115,8 @@ button.small:hover { background: var(--card-hi); }
 .smc-map b { color: var(--fg); font-weight: 600; }
 
 .smc-last { font-size: .86rem; color: var(--dim); }
+.smc-diag { font: .76rem/1.45 ui-monospace, Menlo, monospace; color: var(--dim); background: var(--card); border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 220px; overflow: auto; }
 .smc-last b { color: var(--fg); }
 .smc-tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding-top: 10px; }
 .smc-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) auto auto; gap: 8px; align-items: center;
@@ -301,6 +303,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
     </div>
     <p class="hint" id="smcHelp">No iPhone: abra esta página no app <b>Web MIDI Browser</b>, pareie a SMC por Bluetooth nele e toque em "Conectar mesinha". No computador ou Android: Chrome ou Edge.</p>
     <div class="smc-last">Último controle mexido: <b id="smcLast">—</b></div>
+    <div class="smc-diag" id="smcDiag" hidden></div>
     <details id="smcDetails">
       <summary>Mapeador: o que cada controle da mesinha faz (toque em Aprender e mexa o controle)</summary>
       <div class="smc-tools">
@@ -1008,9 +1011,11 @@ function runFunc(f, m) {
   }
 }
 
+let diagCount = 0;
 function onMidi(e) {
   const m = parseMidi(e.data);
   smcBlink();
+  if (diagCount < 5) { diagCount++; diag("chegou: " + Array.from(e.data || []).map(x => x.toString(16)).join(" ")); }
   if (!m) return;
   $("smcLast").textContent = srcName(m.src);
   if (learning) {
@@ -1044,24 +1049,41 @@ function midiInputs() {
 }
 function smcRefresh() {
   if (!midiAccess) return;
-  let ins = [];
-  try { ins = midiInputs().filter(i => i && i.state !== "disconnected"); } catch (e) { ins = []; }
+  let ins = [], all = [];
+  try { all = midiInputs(); } catch (e) { diag("erro lendo a lista: " + e.message); }
+  diag("entradas MIDI: " + (all.length ? all.map(i => (i.name || "?") + " [" + (i.state || "?") + "]").join(", ") : "nenhuma"));
+  ins = all.filter(i => i && i.state !== "disconnected");
   ins.forEach(i => {
     try { i.onmidimessage = onMidi; } catch (e) {}
   });
   $("smcDot").classList.toggle("ok", ins.length > 0);
   $("smcStatus").textContent = ins.length ? "conectada: " + ins.map(i => i.name || "aparelho MIDI").join(", ") : "nenhum aparelho MIDI ainda (pareie a SMC no app e toque em Conectar)";
 }
+// Diagnóstico: cada passo da conexão aparece na tela (para descobrir onde trava no iPhone)
+function diag(msg) {
+  const el = $("smcDiag");
+  el.hidden = false;
+  const t = new Date().toTimeString().slice(0, 8);
+  el.textContent = (el.textContent ? el.textContent + "\n" : "") + t + "  " + msg;
+  el.scrollTop = el.scrollHeight;
+}
 async function smcConnect() {
+  diag("Conectar: navigator.requestMIDIAccess = " + (typeof navigator.requestMIDIAccess));
   if (!navigator.requestMIDIAccess) {
     $("smcStatus").textContent = "este navegador não tem MIDI";
     $("smcHelp").innerHTML = "Este navegador não deixa a página falar com a mesinha. No iPhone use o app <b>Web MIDI Browser</b>; no computador ou Android, Chrome ou Edge. (Dentro da página do Claude não funciona.)";
     return;
   }
   let access;
+  $("smcStatus").textContent = "pedindo acesso à mesinha…";
+  const slow = setTimeout(() => { diag("o app ainda não respondeu (5 s)…"); $("smcStatus").textContent = "o app não respondeu ainda"; }, 5000);
   try {
     access = await navigator.requestMIDIAccess();
+    clearTimeout(slow);
+    diag("acesso liberado ✓");
   } catch (err) {
+    clearTimeout(slow);
+    diag("recusado: " + ((err && (err.name + " " + err.message)) || err));
     $("smcStatus").textContent = "não deixou: " + ((err && (err.message || err.name)) || "bloqueado");
     $("smcHelp").innerHTML = location.hostname.endsWith("claude.ai") || location.hostname.includes("claudeusercontent")
       ? "Dentro da página do Claude o acesso à mesinha é bloqueado. Use o seu link secreto no app <b>Web MIDI Browser</b> (iPhone) ou no Chrome."
