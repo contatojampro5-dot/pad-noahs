@@ -156,6 +156,59 @@ button.small:hover { background: var(--card-hi); }
 
 button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; }
 
+/* ---------- Layout compacto: o principal cabe numa tela ---------- */
+.wrap { gap: 10px; }
+.bar { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
+.bar h1 { font-size: 1.25rem; margin-right: auto; white-space: nowrap; }
+.bar .status { font-size: .82rem; min-width: 0; }
+.mini-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); flex: none; }
+.mini-dot.ok { background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,.7); }
+.estilo button { padding: 4px 10px; font-size: .76rem; }
+.styles { display: flex; flex-wrap: wrap; gap: 6px 8px; grid-template-columns: none; }
+.styles::-webkit-scrollbar { display: none; }
+.style { flex: 0 0 auto; border-radius: 999px; padding: 8px 14px; display: block; white-space: nowrap; }
+.style .n { font-size: .9rem; }
+.style .m { display: none; }
+.keys { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.key { aspect-ratio: auto; height: clamp(58px, 12vw, 104px); border-radius: 14px; }
+.key .nm { font-size: clamp(1.2rem, 4.4vw, 2.2rem); }
+.key .pt { font-size: .7rem; }
+.key .st { display: none; }
+.deck { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 8px 16px; align-items: center;
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; }
+.sl { display: grid; grid-template-columns: auto minmax(0, 1fr) 3.2em; gap: 8px; align-items: center; font-size: .82rem; min-width: 0; }
+.sl label { color: var(--dim); }
+.sl output { font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; white-space: nowrap; font-size: .78rem; }
+.actions { display: flex; gap: 6px; align-items: center; }
+.actions .seg.modo { display: inline-flex; }
+.actions .seg.modo button { padding: 7px 10px; font-size: .78rem; }
+.actions button.small { padding: 7px 12px; font-size: .9rem; }
+#stop { padding: 8px 14px; font-size: .85rem; white-space: nowrap; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; background: transparent; color: var(--dim); padding: 8px 14px; font: 600 .88rem var(--f-body);
+  border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--pad); }
+.panel { border-top-left-radius: 0; border-top-right-radius: 0; }
+.fx h2, .smc h2 { font-size: 1rem; }
+.fxgrid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 16px; }
+.fxgrid .ctl small { display: none; }
+@media (max-width: 860px) {
+  .deck { grid-template-columns: 1fr; gap: 8px; }
+  .actions { justify-content: space-between; }
+  .actions .seg.modo { flex: 1; }
+  .actions .seg.modo button { flex: 1; }
+}
+@media (max-width: 520px) {
+  .wrap { gap: 8px; }
+  .bar .status { order: 3; width: 100%; }
+  .keys { gap: 5px; }
+  .key, [data-estilo] .key { height: 54px; border-radius: 11px; }
+  .style, [data-estilo] .style { padding: 6px 12px; }
+  .style .n { font-size: .82rem; }
+  .key .pt, .key kbd, .key::before { display: none; }
+  .fxgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 /* ---------- Estilos (botão no alto): Aurora (padrão) e Estúdio ---------- */
 .estilo { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
 .estilo button { border: 0; background: transparent; color: var(--dim); padding: 6px 14px; font: 600 .82rem var(--f-body); cursor: pointer; }
@@ -232,70 +285,78 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
 [data-estilo="estudio"] .estilo { border-radius: 4px; }
 
 @media (max-width: 760px) {
-  .main { grid-template-columns: 1fr; }
-  .keys { grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .key kbd { display: none; }
-  .key.on .pt { display: none; }
-  .key .st { bottom: 6px; font-size: .62rem; }
   .scale .line > span:first-child { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (max-width: 520px) {
+  [data-estilo="estudio"] .style .n { letter-spacing: .02em; font-size: .74rem; }
+  [data-estilo="estudio"] .style { padding: 6px 10px; }
+  [data-estilo="estudio"] .bar .status { font-size: .74rem; }
+}
 </style>
 
 <div class="wrap">
-  <header>
+  <header class="bar">
     <h1>Pad <span>Noah’s</span></h1>
-    <div class="top-right">
-      <div class="status" id="status" aria-live="polite">Toque um tom para começar</div>
-      <div class="estilo" role="group" aria-label="Estilo da página">
-        <button id="st-aurora" aria-pressed="true">Aurora</button>
-        <button id="st-estudio" aria-pressed="false">Estúdio</button>
-      </div>
+    <div class="status" id="status" aria-live="polite">Toque um tom para começar</div>
+    <span class="mini-dot" id="smcMini" title="Mesinha"></span>
+    <div class="estilo" role="group" aria-label="Estilo da página">
+      <button id="st-aurora" aria-pressed="true">Aurora</button>
+      <button id="st-estudio" aria-pressed="false">Estúdio</button>
     </div>
   </header>
 
-  <section aria-labelledby="lbl-pads">
-    <p class="label" id="lbl-pads">Pads · toque para ligar ou desligar (dá para juntar mais de um)</p>
-    <div class="styles" id="styles"></div>
-  </section>
+  <!-- pads: toque para ligar/desligar (dá para juntar mais de um) -->
+  <div class="styles" id="styles" role="group" aria-label="Pads (toque para ligar ou desligar)"></div>
 
-  <section class="main">
-    <div>
-      <p class="label">Tom (o pad muda de altura para cada tom)</p>
-      <div class="keys" id="keys"></div>
+  <!-- os 12 tons, sempre em 2 fileiras -->
+  <div class="keys" id="keys"></div>
+
+  <!-- controles do dia a dia, compactos -->
+  <div class="deck">
+    <div class="sl"><label for="vol">Volume</label><input type="range" id="vol" min="0" max="100" value="70"><output id="volOut">70%</output></div>
+    <div class="sl"><label for="rev">Reverb</label><input type="range" id="rev" min="0" max="100" value="35"><output id="revOut">35%</output></div>
+    <div class="sl"><label for="cut" title="Esquerda abafa (escuro), direita abre (brilhante)">Cutoff</label><input type="range" id="cut" min="0" max="100" value="100"><output id="cutOut">aberto</output></div>
+    <div class="actions">
+      <div class="seg modo" role="group" aria-label="Ao tocar um tom">
+        <button id="md-trocar" aria-pressed="true" title="O novo tom substitui (passagem suave)">Trocar</button>
+        <button id="md-somar" aria-pressed="false" title="Junta tons (ex.: C + G)">Somar</button>
+      </div>
+      <button class="small" id="prev" aria-label="Tom anterior">◀</button>
+      <button class="small" id="next" aria-label="Próximo tom">▶</button>
+      <button id="stop">■ Parar</button>
     </div>
-    <aside class="side">
-      <div class="ctl">
-        <div class="row"><label for="vol">Volume</label><output id="volOut">70%</output></div>
-        <input type="range" id="vol" min="0" max="100" value="70">
-      </div>
-      <div class="ctl">
-        <div class="row"><label for="rev">Reverb de igreja</label><output id="revOut">35%</output></div>
-        <input type="range" id="rev" min="0" max="100" value="35">
-      </div>
-      <div class="ctl">
-        <div class="row"><label for="cut">Cutoff</label><output id="cutOut">aberto</output></div>
-        <input type="range" id="cut" min="0" max="100" value="100" aria-describedby="cutHint">
-        <span class="hint" id="cutHint">Esquerda abafa (escuro), direita abre (brilhante).</span>
-      </div>
-      <div class="ctl">
-        <div class="row"><span>Ao tocar um tom</span></div>
-        <div class="seg modo" role="group" aria-label="Ao tocar um tom">
-          <button id="md-trocar" aria-pressed="true">Trocar</button>
-          <button id="md-somar" aria-pressed="false">Somar</button>
-        </div>
-        <span class="hint">Trocar: o novo tom substitui. Somar: junta tons (ex.: C + G).</span>
-      </div>
-      <div class="btns">
-        <button class="small" id="prev" aria-label="Tom anterior">◀ Tom</button>
-        <button class="small" id="next" aria-label="Próximo tom">Tom ▶</button>
-      </div>
-      <button id="stop">■ PARAR PAD</button>
-      <p class="hint">A troca de tom é suave (o novo entra enquanto o outro sai). Teclado: Z S X D C V G B H N J M, setas e Esc.</p>
-    </aside>
-  </section>
+  </div>
 
-  <section class="smc" aria-labelledby="smcTitle">
+  <nav class="tabs" role="tablist" aria-label="Mais opções">
+    <button role="tab" id="tb-fx" data-tab="fx" aria-selected="true">Efeitos</button>
+    <button role="tab" id="tb-scale" data-tab="scale" aria-selected="false">Escala</button>
+    <button role="tab" id="tb-smc" data-tab="smc" aria-selected="false">Mesinha</button>
+  </nav>
+  <section class="fx panel" id="tab-fx" role="tabpanel" aria-labelledby="tb-fx">
+    <div class="head">
+      <h2 id="fxTitle">Efeitos</h2>
+      <div class="presets" id="presets" role="group" aria-label="Receitas prontas"></div>
+    </div>
+    <div class="fxgrid" id="fxgrid"></div>
+  </section>
+  <section class="scale panel" id="tab-scale" role="tabpanel" aria-labelledby="tb-scale" aria-live="polite" hidden>
+    <div class="line" style="justify-content: space-between;">
+      <h2 id="tomTitle">Tom: —</h2>
+      <div class="seg" role="group" aria-label="Maior ou menor">
+        <button id="maj" aria-pressed="true">Maior</button>
+        <button id="min" aria-pressed="false">Menor</button>
+      </div>
+    </div>
+    <div class="line"><span>Escala</span><div class="chips" id="escala"></div></div>
+    <div class="line"><span>Pentatônica</span><div class="chips" id="penta"></div></div>
+    <div class="line"><span>Acordes do tom</span><div class="chips" id="acordes"></div></div>
+    <div class="line"><span>Sequência</span><div class="chips" id="seq"></div></div>
+    <div class="line" id="fundoLine" hidden><span>Acordes do fundo</span><div class="chips" id="fundo"></div></div>
+    <p class="hint" id="scaleHint">Estes pads não têm terça: o pad de G serve para G e para Gm.</p>
+  </section>
+  <section class="smc panel" id="tab-smc" role="tabpanel" aria-labelledby="tb-smc" hidden>
     <div class="head">
       <h2 id="smcTitle">Mesinha SMC-Mixer</h2>
       <div class="smc-state"><span class="dot" id="smcDot"></span><span id="smcStatus">desconectada</span></div>
@@ -312,30 +373,6 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
       </div>
       <div class="smc-map" id="smcMap"></div>
     </details>
-  </section>
-
-  <section class="fx" aria-labelledby="fxTitle">
-    <div class="head">
-      <h2 id="fxTitle">Efeitos</h2>
-      <div class="presets" id="presets" role="group" aria-label="Receitas prontas"></div>
-    </div>
-    <div class="fxgrid" id="fxgrid"></div>
-  </section>
-
-  <section class="scale" aria-live="polite">
-    <div class="line" style="justify-content: space-between;">
-      <h2 id="tomTitle">Tom: —</h2>
-      <div class="seg" role="group" aria-label="Maior ou menor">
-        <button id="maj" aria-pressed="true">Maior</button>
-        <button id="min" aria-pressed="false">Menor</button>
-      </div>
-    </div>
-    <div class="line"><span>Escala</span><div class="chips" id="escala"></div></div>
-    <div class="line"><span>Pentatônica</span><div class="chips" id="penta"></div></div>
-    <div class="line"><span>Acordes do tom</span><div class="chips" id="acordes"></div></div>
-    <div class="line"><span>Sequência</span><div class="chips" id="seq"></div></div>
-    <div class="line" id="fundoLine" hidden><span>Acordes do fundo</span><div class="chips" id="fundo"></div></div>
-    <p class="hint" id="scaleHint">Estes pads não têm terça: o pad de G serve para G e para Gm.</p>
   </section>
 </div>
 
@@ -1080,6 +1117,7 @@ function smcRefresh() {
     try { i.onmidimessage = onMidi; } catch (e) {}
   });
   $("smcDot").classList.toggle("ok", ins.length > 0);
+  $("smcMini").classList.toggle("ok", ins.length > 0);
   $("smcStatus").textContent = ins.length ? "conectada: " + ins.map(i => i.name || "aparelho MIDI").join(", ") : "nenhum aparelho MIDI ainda (pareie a SMC no app e toque em Conectar)";
 }
 // Diagnóstico: cada passo da conexão aparece na tela (para descobrir onde trava no iPhone)
@@ -1141,6 +1179,15 @@ $("cut").addEventListener("input", e => {
   if (filter) filter.frequency.setTargetAtTime(Math.min(cutHz(state.cut), ctx.sampleRate * 0.45), ctx.currentTime, 0.04);
 });
 $("stop").addEventListener("click", stop);
+function setTab(t) {
+  state.tab = t; save();
+  ["fx", "scale", "smc"].forEach(x => {
+    $("tab-" + x).hidden = x !== t;
+    $("tb-" + x).setAttribute("aria-selected", String(x === t));
+  });
+}
+document.querySelectorAll(".tabs [data-tab]").forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
+setTab(["fx", "scale", "smc"].includes(store.tab) ? store.tab : "fx");
 $("md-trocar").addEventListener("click", () => {
   state.somar = false; save();
   // voltando para Trocar com vários tons: fica só o último
