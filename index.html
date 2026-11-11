@@ -330,7 +330,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
   #stop { flex: 2; padding: 6px 8px; font-size: .78rem; }
   .tabs { grid-area: tabs; }
   .tabs button { padding: 5px 12px; font-size: .78rem; }
-  .panel { grid-area: panel; padding: 8px 12px; gap: 8px; }
+  .panel { padding: 8px 12px; gap: 8px; }
   .fx h2, .smc h2, .scale h2 { font-size: .9rem; }
   .presets { display: flex; flex-wrap: nowrap; gap: 5px; width: auto; }
   .presets button, [data-estilo] .presets button { padding: 4px 10px; font-size: .72rem; }
@@ -400,6 +400,40 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
   .metro-go { padding: 7px 12px; font-size: .85rem; }
 }
 
+/* ---------- Tela fixa: sempre do tamanho da tela; o que não cabe desliza para o lado ---------- */
+html, body { height: 100%; }
+body { overflow: hidden; }
+.wrap { height: 100%; grid-template-rows: auto auto auto auto auto minmax(0, 1fr); align-content: stretch; }
+.carousel { align-self: stretch; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none;
+  min-height: 0; gap: 12px; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+.carousel::-webkit-scrollbar { display: none; }
+.carousel > .panel { flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always; min-width: 0; max-height: 100%;
+  overflow-y: auto; overscroll-behavior: contain; align-content: start; }
+.styles { display: grid; grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; scroll-snap-type: x proximity;
+  scrollbar-width: none; flex-wrap: nowrap; }
+.styles::-webkit-scrollbar { display: none; }
+.styles .style { scroll-snap-align: start; }
+.loopbtn.rec { background: var(--stop); color: #fff; border-color: var(--stop); animation: piscar 1s steps(2) infinite; }
+.loopbtn.play { background: var(--pad); color: var(--pad-ink); border-color: var(--pad); }
+@keyframes piscar { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .loopbtn.rec { animation: none; } }
+#loopBtn { white-space: nowrap; }
+/* celular (em pé ou deitado): Trocar/Somar numa linha; ◀ ▶ Loop Parar na outra, do mesmo tamanho */
+@media (max-width: 860px), (orientation: landscape) and (max-height: 520px) {
+  .actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .actions .seg.modo { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
+  .actions button.small, #stop { width: 100%; padding-left: 4px; padding-right: 4px; }
+}
+@media (max-width: 520px) {
+  .styles { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: calc((100% - 18px) / 4); }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .wrap { grid-template-rows: auto auto auto auto minmax(0, 1fr); }
+  .styles, .keys, .deck { align-self: start; }
+  .carousel { grid-area: panel; }
+  .styles { grid-template-columns: none; grid-auto-columns: calc((100% - 15px) / 4); }
+}
+
 /* Tela cheia no iPhone: o conteúdo desce para baixo do Dynamic Island / entalhe (e do botão flutuante do app) */
 html.fs body { padding-top: max(env(safe-area-inset-top, 0px), 92px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px); }
 html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
@@ -436,6 +470,7 @@ html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
       </div>
       <button class="small" id="prev" aria-label="Tom anterior">◀</button>
       <button class="small" id="next" aria-label="Próximo tom">▶</button>
+      <button class="small loopbtn" id="loopBtn" title="Gravar uma sequência de tons que repete">⟳ Loop</button>
       <button id="stop">■ Parar</button>
     </div>
   </div>
@@ -448,7 +483,15 @@ html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
     <button role="tab" id="tb-scale" data-tab="scale" aria-selected="false">Escala</button>
     <button role="tab" id="tb-smc" data-tab="smc" aria-selected="false">Mesinha</button>
   </nav>
-  <section class="shots panel" id="tab-shots" role="tabpanel" aria-labelledby="tb-shots" hidden>
+  <div class="carousel" id="carousel">
+  <section class="fx panel" id="tab-fx" role="tabpanel" aria-labelledby="tb-fx">
+    <div class="head">
+      <h2 id="fxTitle">Efeitos</h2>
+      <div class="presets" id="presets" role="group" aria-label="Receitas prontas"></div>
+    </div>
+    <div class="fxgrid" id="fxgrid"></div>
+  </section>
+  <section class="shots panel" id="tab-shots" role="tabpanel" aria-labelledby="tb-shots">
     <div class="head">
       <h2>Disparos</h2>
       <div class="sl shotvol"><label for="shotVol">Volume</label><input type="range" id="shotVol" min="0" max="100" value="80"><output id="shotVolOut">80%</output></div>
@@ -465,7 +508,7 @@ html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
       <p class="hint" id="shotMsg">O som fica só neste aparelho.</p>
     </details>
   </section>
-  <section class="metro panel" id="tab-metro" role="tabpanel" aria-labelledby="tb-metro" hidden>
+  <section class="metro panel" id="tab-metro" role="tabpanel" aria-labelledby="tb-metro">
     <div class="metro-top">
       <button id="metroGo" class="metro-go">▶ Ligar</button>
       <div class="bpm">
@@ -489,7 +532,7 @@ html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
     </div>
     <label class="check"><input type="checkbox" id="clickSplit"><span>Click só no lado <b>esquerdo</b> e pads só no <b>direito</b> (para fone de retorno / in-ear)</span></label>
   </section>
-  <section class="mine panel" id="tab-mine" role="tabpanel" aria-labelledby="tb-mine" hidden>
+  <section class="mine panel" id="tab-mine" role="tabpanel" aria-labelledby="tb-mine">
     <div class="head">
       <h2>Meus sons</h2>
       <label class="small filebtn primary">+ Adicionar som<input type="file" id="mineFile" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac" hidden></label>
@@ -497,14 +540,7 @@ html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
     <p class="hint" id="mineMsg">Escolha um MP3 ou WAV de pad. A página descobre o tom, iguala o volume e faz o loop. Fica <b>só neste aparelho</b>: ninguém mais vê.</p>
     <div class="minelist" id="mineList"></div>
   </section>
-  <section class="fx panel" id="tab-fx" role="tabpanel" aria-labelledby="tb-fx">
-    <div class="head">
-      <h2 id="fxTitle">Efeitos</h2>
-      <div class="presets" id="presets" role="group" aria-label="Receitas prontas"></div>
-    </div>
-    <div class="fxgrid" id="fxgrid"></div>
-  </section>
-  <section class="scale panel" id="tab-scale" role="tabpanel" aria-labelledby="tb-scale" aria-live="polite" hidden>
+  <section class="scale panel" id="tab-scale" role="tabpanel" aria-labelledby="tb-scale" aria-live="polite">
     <div class="line" style="justify-content: space-between;">
       <h2 id="tomTitle">Tom: —</h2>
       <div class="seg" role="group" aria-label="Maior ou menor">
@@ -519,7 +555,7 @@ html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
     <div class="line" id="fundoLine" hidden><span>Acordes do fundo</span><div class="chips" id="fundo"></div></div>
     <p class="hint" id="scaleHint">Estes pads não têm terça: o pad de G serve para G e para Gm.</p>
   </section>
-  <section class="smc panel" id="tab-smc" role="tabpanel" aria-labelledby="tb-smc" hidden>
+  <section class="smc panel" id="tab-smc" role="tabpanel" aria-labelledby="tb-smc">
     <div class="head">
       <h2 id="smcTitle">Mesinha SMC-Mixer</h2>
       <div class="smc-state"><span class="dot" id="smcDot"></span><span id="smcStatus">desconectada</span></div>
@@ -537,6 +573,8 @@ html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
       <div class="smc-map" id="smcMap"></div>
     </details>
   </section>
+  </div>
+
 </div>
 
 <script>
@@ -955,6 +993,7 @@ function toggleKey(key) {
 }
 
 function stop() {
+  if (window.loopHalt) loopHalt();
   setKeys([]);
   playId++;
   voices.forEach(v => v.stop());
@@ -964,6 +1003,7 @@ function stop() {
 }
 
 function press(key) {
+  if (window.loopPress && loopPress(key)) return;
   if (state.somar) toggleKey(key);
   else if (activeKeys.length === 1 && activeKey === key) stop();
   else play(key);
@@ -1377,15 +1417,27 @@ window.addEventListener("resize", checkFullscreen);
 window.addEventListener("orientationchange", () => setTimeout(checkFullscreen, 300));
 checkFullscreen();
 const TABS = ["fx", "shots", "metro", "mine", "scale", "smc"];
-function setTab(t) {
-  state.tab = t; save();
-  TABS.forEach(x => {
-    $("tab-" + x).hidden = x !== t;
-    $("tb-" + x).setAttribute("aria-selected", String(x === t));
-  });
+// Blocos de baixo: deslizam para o lado (a tela de cima não muda). A aba só mostra onde você está.
+function markTab(t) {
+  TABS.forEach(x => $("tb-" + x).setAttribute("aria-selected", String(x === t)));
+  const b = $("tb-" + t); if (b && b.scrollIntoView) b.scrollIntoView({ block: "nearest", inline: "nearest" });
+}
+function setTab(t, smooth = true) {
+  state.tab = t; save(); markTab(t);
+  const c = $("carousel"), i = TABS.indexOf(t);
+  c.scrollTo({ left: i * c.clientWidth, behavior: smooth ? "smooth" : "auto" });
 }
 document.querySelectorAll(".tabs [data-tab]").forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
-setTab(TABS.includes(store.tab) ? store.tab : "fx");
+$("carousel").addEventListener("scroll", () => {
+  clearTimeout(setTab.t);
+  setTab.t = setTimeout(() => {
+    const c = $("carousel"), i = Math.round(c.scrollLeft / Math.max(1, c.clientWidth));
+    const t = TABS[Math.max(0, Math.min(TABS.length - 1, i))];
+    if (t !== state.tab) { state.tab = t; save(); markTab(t); }
+  }, 90);
+}, { passive: true });
+window.addEventListener("resize", () => setTab(state.tab || "fx", false));
+requestAnimationFrame(() => setTab(TABS.includes(store.tab) ? store.tab : "fx", false));
 $("md-trocar").addEventListener("click", () => {
   state.somar = false; save();
   // voltando para Trocar com vários tons: fica só o último
@@ -1863,6 +1915,84 @@ $("clickVol").addEventListener("input", e => {
   if (clickBus) clickBus.gain.setTargetAtTime(metro.vol, ctx.currentTime, 0.03);
 });
 $("clickSplit").addEventListener("change", e => { metro.split = e.target.checked; metroSave(); if (clickBus) metroApplySplit(); else if (padPan && ctx) padPan.pan.value = metro.split ? 1 : 0; });
+
+// ---------- Loop de tons: grava a sequência no ritmo tocado e repete ----------
+// Loop → toca os tons na ordem → Feito. Com o metrônomo ligado, cada troca vira compassos inteiros e cai no "1".
+const loop = { mode: "idle", taps: [], steps: [], timer: null, i: 0 };
+function loopLabel() { return loop.steps.map(x => KEYS[x.key]).join(" → "); }
+function renderLoop() {
+  const b = $("loopBtn");
+  b.classList.toggle("rec", loop.mode === "rec");
+  b.classList.toggle("play", loop.mode === "play");
+  b.textContent = loop.mode === "rec" ? "✓ Feito" : loop.mode === "play" ? "⟳ " + loop.steps.map(x => KEYS[x.key]).join("·") : "⟳ Loop";
+  b.title = loop.mode === "play" ? "Loop tocando: toque para parar só o loop" : loop.mode === "rec" ? "Toque quando terminar a sequência" : "Gravar uma sequência de tons que repete";
+}
+function loopHalt() {
+  clearTimeout(loop.timer); loop.timer = null;
+  if (loop.mode !== "idle") { loop.mode = "idle"; renderLoop(); }
+}
+// chamado por press(): gravando, guarda o tom; tocando o loop, tocar um tom com a mão sai do loop
+window.loopPress = function (key) {
+  if (loop.mode === "rec") {
+    loop.taps.push({ key, t: performance.now() });
+    play(key);
+    setStatus("Gravando loop: <b>" + loop.taps.map(x => KEYS[x.key]).join(" → ") + "</b> · toque em ✓ Feito quando terminar");
+    return true;
+  }
+  if (loop.mode === "play") loopHalt();
+  return false;
+};
+window.loopHalt = loopHalt;
+function loopStep() {
+  if (loop.mode !== "play") return;
+  const st = loop.steps[loop.i];
+  play(st.key); // play() chama stop() não: só troca de tom
+  setStatus("Loop: <b>" + loopLabel() + "</b> (repete) · agora <b>" + KEYS[st.key] + "</b>");
+  loop.i = (loop.i + 1) % loop.steps.length;
+  if (metro.on) {
+    // próxima troca exatamente no relógio do metrônomo (no "1" de um compasso)
+    loop.next += st.dur;
+    const wait = Math.max(0, (loop.next - ctx.currentTime) * 1000 - 15);
+    loop.timer = setTimeout(loopStep, wait);
+  } else {
+    loop.timer = setTimeout(loopStep, st.dur * 1000);
+  }
+}
+function loopFinish() {
+  const now = performance.now();
+  const taps = loop.taps;
+  if (!taps.length) { loop.mode = "idle"; renderLoop(); setStatus("Loop cancelado (nenhum tom tocado)."); return; }
+  const bar = metro.sig * metroBeatDur();
+  loop.steps = taps.map((x, n) => {
+    let d = ((n + 1 < taps.length ? taps[n + 1].t : now) - x.t) / 1000;
+    d = metro.on ? Math.max(1, Math.round(d / bar)) * bar : Math.max(1, d);
+    return { key: x.key, dur: d };
+  });
+  state.loopSteps = loop.steps; save();
+  loop.mode = "play"; loop.i = 0; renderLoop();
+  if (metro.on) {
+    // começa no próximo "1"
+    loop.next = metroNextDownbeat(ctx.currentTime + 0.05);
+    loop.timer = setTimeout(loopStep, Math.max(0, (loop.next - ctx.currentTime) * 1000 - 15));
+    setStatus("Loop: <b>" + loopLabel() + "</b> · começa no próximo 1");
+  } else {
+    loopStep();
+  }
+}
+$("loopBtn").addEventListener("click", () => {
+  if (loop.mode === "idle") {
+    loop.mode = "rec"; loop.taps = []; renderLoop();
+    setStatus("Gravando loop: toque os tons <b>na ordem e no ritmo</b> que quiser, depois ✓ Feito");
+  } else if (loop.mode === "rec") {
+    loopFinish();
+  } else {
+    loopHalt();
+    setStatus(activeKey !== null ? "Loop parado · continua em <b>" + KEYS[activeKey] + "</b>" : "Loop parado");
+  }
+});
+// o loop no mapeador da mesinha
+FUNCS.push({ id: "loop", name: "Loop: gravar / feito / parar", run: () => $("loopBtn").click() });
+renderLoop();
 
 // ---------- Começo ----------
 buildShots();
