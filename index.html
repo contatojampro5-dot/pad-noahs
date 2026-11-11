@@ -303,6 +303,42 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--warm); outl
   [data-estilo="estudio"] .style { padding: 6px 10px; }
   [data-estilo="estudio"] .bar .status { font-size: .74rem; }
 }
+/* Celular deitado (tela larga e baixa): tons + pads na esquerda, controles na direita, tudo menor */
+@media (orientation: landscape) and (max-height: 520px) {
+  body { padding-block: 6px 12px; font-size: 13px; }
+  .wrap { max-width: none; gap: 6px 12px; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    grid-template-areas: "bar bar" "styles deck" "keys deck" "tabs tabs" "panel panel"; align-items: start; }
+  .bar { grid-area: bar; gap: 6px 10px; flex-wrap: nowrap; }
+  .bar h1 { font-size: 1rem; }
+  .bar .status { order: 0; width: auto; flex: 1; font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .estilo button { padding: 3px 8px; font-size: .68rem; }
+  .styles { grid-area: styles; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+  .style, [data-estilo] .style { padding: 5px 4px; text-align: center; border-radius: 9px; min-width: 0; }
+  .style .n { display: none; }
+  .style .sn, [data-estilo] .style .sn { display: block; font-size: .7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0; }
+  .keys { grid-area: keys; gap: 5px; }
+  .key, [data-estilo] .key { height: 42px; border-radius: 10px; }
+  .key .nm, [data-estilo] .key .nm { font-size: 1.05rem; }
+  .key .pt, .key kbd, .key::before { display: none; }
+  .deck { grid-area: deck; grid-template-columns: 1fr; gap: 5px; padding: 8px 10px; border-radius: 12px; }
+  .sl { font-size: .74rem; gap: 6px; }
+  .sl output { font-size: .7rem; }
+  .actions { gap: 4px; flex-wrap: wrap; }
+  .actions .seg.modo { flex: 1 1 100%; }
+  .actions .seg.modo button { flex: 1; padding: 5px 6px; font-size: .72rem; }
+  .actions button.small { flex: 1; padding: 5px 8px; font-size: .8rem; }
+  #stop { flex: 2; padding: 6px 8px; font-size: .78rem; }
+  .tabs { grid-area: tabs; }
+  .tabs button { padding: 5px 12px; font-size: .78rem; }
+  .panel { grid-area: panel; padding: 8px 12px; gap: 8px; }
+  .fx h2, .smc h2, .scale h2 { font-size: .9rem; }
+  .presets { display: flex; flex-wrap: nowrap; gap: 5px; width: auto; }
+  .presets button, [data-estilo] .presets button { padding: 4px 10px; font-size: .72rem; }
+  .fxgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px 10px; }
+  .fxgrid .ctl label, .fxgrid .ctl output { font-size: .7rem; }
+  .chip { font-size: .78rem; padding: 2px 6px; }
+}
+
 /* Tela cheia no iPhone: o conteúdo desce para baixo do Dynamic Island / entalhe (e do botão flutuante do app) */
 html.fs body { padding-top: max(env(safe-area-inset-top, 0px), 92px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px); }
 html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
