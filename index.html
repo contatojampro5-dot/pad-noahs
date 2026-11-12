@@ -3,6 +3,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#070b18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pad Noah's">
 <script>window.PAD_ENC = true;</script>
 </head><body>
 <title>Pad Noah’s</title>
@@ -434,18 +441,77 @@ body { overflow: hidden; }
   .styles { grid-template-columns: none; grid-auto-columns: calc((100% - 15px) / 4); }
 }
 
+/* ---------- Modo Palco: preto, gigante, para ver de longe ---------- */
+.stagebtn { border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 999px; padding: 4px 10px;
+  font: 600 .76rem var(--f-body); cursor: pointer; white-space: nowrap; }
+.stage { position: fixed; inset: 0; z-index: 50; background: #000; color: #fff; display: grid;
+  grid-template-rows: auto 1fr auto; padding: max(14px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px))
+  max(14px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); font-family: var(--f-display); user-select: none; -webkit-user-select: none; }
+html.fs .stage { padding-top: max(env(safe-area-inset-top, 0px), 92px); }
+.st-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: clamp(.9rem, 3.5vw, 1.4rem); color: #9a9a9a; padding-right: 150px; }
+.st-pads { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-bpm { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.st-bpm i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #444; transition: background .05s; }
+.st-bpm i.on { background: var(--pad); border-color: var(--pad); }
+.st-bpm i.on.acc { background: var(--warm); border-color: var(--warm); }
+.st-bpm b { color: #fff; font-variant-numeric: tabular-nums; }
+.st-center { display: grid; place-content: center; text-align: center; min-height: 0; }
+.st-key { font-size: min(52vh, 68vw); font-weight: 700; line-height: .95; letter-spacing: -.02em; color: var(--pad); }
+.st-key.off { color: #333; }
+.st-pt { font-size: clamp(1rem, 4.5vw, 2rem); color: #bbb; margin-top: 4px; }
+.st-next { font-size: clamp(1rem, 5vw, 2.2rem); color: #8a8a8a; margin-top: 14px; min-height: 1.2em; }
+.st-next b { color: #fff; }
+.st-bottom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.st-b { border: 2px solid #2a2a2a; background: #111; color: #fff; border-radius: 18px; font: 700 clamp(1.6rem, 7vw, 2.6rem) var(--f-display);
+  padding: clamp(10px, 3vh, 22px) 0; cursor: pointer; touch-action: manipulation; }
+.st-b:active { background: #222; }
+.st-stop { color: var(--stop); }
+.st-corner { position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); display: flex; gap: 8px; }
+html.fs .st-corner { top: max(env(safe-area-inset-top, 0px), 92px); }
+.st-lock, .st-exit { border: 1px solid #333; background: #111; color: #ddd; border-radius: 12px; padding: 8px 14px; font: 600 1rem var(--f-body); cursor: pointer; }
+.st-lock.locked { background: var(--warm); color: #2a1a00; border-color: var(--warm); }
+.st-lock.holding { box-shadow: 0 0 0 4px rgba(255,255,255,.35); }
+.stage.locked .st-b, .stage.locked .st-exit { opacity: .25; pointer-events: none; }
+.st-hint { position: absolute; left: 0; right: 0; bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) + 110px); text-align: center; color: #fff; font: 600 1.1rem var(--f-body); background: rgba(0,0,0,.7); padding: 10px; }
+@media (orientation: landscape) and (max-height: 520px) {
+  .st-key { font-size: 46vh; }
+  .st-bottom { grid-template-columns: repeat(3, minmax(0, 160px)); justify-content: center; }
+}
+
 /* Tela cheia no iPhone: o conteúdo desce para baixo do Dynamic Island / entalhe (e do botão flutuante do app) */
 html.fs body { padding-top: max(env(safe-area-inset-top, 0px), 92px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px); }
 html.fs.landscape body { padding-top: max(env(safe-area-inset-top, 0px), 12px);
   padding-left: max(16px, env(safe-area-inset-left, 0px), 56px); padding-right: max(16px, env(safe-area-inset-right, 0px), 56px); }
 </style>
 
+<div class="stage" id="stage" hidden>
+  <div class="st-top">
+    <span class="st-pads" id="stPads">—</span>
+    <span class="st-bpm" id="stBpm"><i id="stBeat"></i><b id="stBpmVal">—</b></span>
+  </div>
+  <div class="st-center" id="stCenter">
+    <div class="st-key" id="stKey">—</div>
+    <div class="st-pt" id="stPt">Toque ▶ para começar</div>
+    <div class="st-next" id="stNext"></div>
+  </div>
+  <div class="st-bottom">
+    <button class="st-b" id="stPrev" aria-label="Tom anterior">◀</button>
+    <button class="st-b st-stop" id="stStop" aria-label="Parar">■</button>
+    <button class="st-b" id="stNextBtn" aria-label="Próximo tom">▶</button>
+  </div>
+  <div class="st-corner">
+    <button class="st-lock" id="stLock" aria-label="Travar a tela">🔓</button>
+    <button class="st-exit" id="stExit">Sair</button>
+  </div>
+  <div class="st-hint" id="stHint" hidden>Tela travada · segure o 🔒 para destravar</div>
+</div>
 <div class="wrap">
   <header class="bar">
     <h1>Pad <span>Noah’s</span></h1>
     <div class="status" id="status" aria-live="polite">Toque um tom para começar</div>
     <span class="metro-dot" id="metroMini" title="Metrônomo"></span>
     <span class="mini-dot" id="smcMini" title="Mesinha"></span>
+    <button class="stagebtn" id="stageBtn" title="Modo Palco: tela grande e escura para tocar ao vivo">🎤 Palco</button>
     <div class="estilo" role="group" aria-label="Estilo da página">
       <button id="st-aurora" aria-pressed="true">Aurora</button>
       <button id="st-estudio" aria-pressed="false">Estúdio</button>
@@ -800,19 +866,37 @@ function padKey() {
   if (m) { try { localStorage.setItem("padkey", m[1]); } catch (e) {} return m[1]; }
   try { return localStorage.getItem("padkey"); } catch (e) { return null; }
 }
+// Arquivos de som guardados no aparelho (Cache do navegador): se a internet cair no evento, continua tocando.
+const KEPT = "pad-noahs-sons-v1";
+const keptMem = new Map();
+async function fetchKept(url) {
+  if (keptMem.has(url)) return keptMem.get(url).slice(0);
+  let res = null;
+  try { if (window.caches) res = await (await caches.open(KEPT)).match(url); } catch (e) {}
+  if (!res) {
+    res = await fetch(url);
+    if (!res.ok) throw new Error("não achei o arquivo");
+    try { if (window.caches) await (await caches.open(KEPT)).put(url, res.clone()); } catch (e) {}
+  }
+  const ab = await res.arrayBuffer();
+  keptMem.set(url, ab);
+  return ab.slice(0);
+}
+// baixa todos os pads de uma vez (fora do Claude), para ficar tudo no aparelho
+async function keepAll() {
+  const files = [];
+  PADS.forEach(p => p.rec.forEach(r => { if (r.file) files.push(window.PAD_ENC && p.partner ? r.file.replace(/\.mp3$/, ".bin") : r.file); }));
+  let ok = 0;
+  for (const f of files) { try { await fetchKept(f); ok++; } catch (e) {} }
+  return ok === files.length;
+}
 async function getAudio(r, partner) {
   if (r.blob) return mineData(r.blob); // som que a pessoa pôs neste aparelho
   const file = r.file;
-  if (!window.PAD_ENC || !partner) {
-    const res = await fetch(file);
-    if (!res.ok) throw new Error("não achei o arquivo");
-    return res.arrayBuffer();
-  }
+  if (!window.PAD_ENC || !partner) return fetchKept(file);
   const k = padKey();
   if (!k) { setStatus("Abra a página pelo seu link completo (com a chave) uma vez."); throw new Error("sem chave"); }
-  const res = await fetch(file.replace(/\.mp3$/, ".bin"));
-  if (!res.ok) throw new Error("não achei o arquivo");
-  const data = new Uint8Array(await res.arrayBuffer());
+  const data = new Uint8Array(await fetchKept(file.replace(/\.mp3$/, ".bin")));
   const raw = Uint8Array.from(atob(k.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0));
   const key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
   return crypto.subtle.decrypt({ name: "AES-GCM", iv: data.slice(0, 12) }, key, data.slice(12));
@@ -1993,6 +2077,77 @@ $("loopBtn").addEventListener("click", () => {
 // o loop no mapeador da mesinha
 FUNCS.push({ id: "loop", name: "Loop: gravar / feito / parar", run: () => $("loopBtn").click() });
 renderLoop();
+
+// ---------- Modo Palco: tela preta gigante (tom, próximo do loop, BPM no tempo) ----------
+const stage = { on: false, locked: false };
+function stageRender() {
+  if (!stage.on) return;
+  const k = activeKey;
+  $("stKey").textContent = k === null ? "—" : (activeKeys.length > 1 ? activeKeys.map(x => KEYS[x]).join("+") : KEYS[k]);
+  $("stKey").classList.toggle("off", k === null);
+  $("stPt").textContent = k === null ? "Toque ▶ para começar" : KEYS_PT[k];
+  $("stPads").textContent = state.on.map(i => PADS[i] ? (PADS[i].short || PADS[i].name) : "").join(" + ");
+  $("stNext").innerHTML = loop.mode === "play" && loop.steps.length ? "próximo: <b>" + KEYS[loop.steps[loop.i].key] + "</b>"
+    : loop.mode === "rec" ? "gravando loop…" : "";
+  $("stBpmVal").textContent = metro.on ? metro.bpm + " BPM" : "";
+  $("stBeat").style.visibility = metro.on ? "visible" : "hidden";
+}
+const baseRender = render;
+render = function () { baseRender(); stageRender(); };
+// o BPM pisca no tempo também no palco
+const baseShowBeat = metroShowBeat;
+metroShowBeat = function (b) {
+  baseShowBeat(b);
+  if (!stage.on) return;
+  const d = $("stBeat"); d.classList.add("on"); d.classList.toggle("acc", b === 0);
+  clearTimeout(stageRender.t); stageRender.t = setTimeout(() => d.classList.remove("on", "acc"), 110);
+};
+function stageOpen() {
+  stage.on = true; $("stage").hidden = false; keepAwake();
+  try { const el = document.documentElement; if (el.requestFullscreen) el.requestFullscreen().catch(() => {}); } catch (e) {}
+  stageRender();
+}
+function stageClose() {
+  stage.on = false; stage.locked = false; $("stage").hidden = true; $("stage").classList.remove("locked");
+  $("stLock").classList.remove("locked"); $("stLock").textContent = "🔓";
+  try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); } catch (e) {}
+}
+$("stageBtn").addEventListener("click", stageOpen);
+$("stExit").addEventListener("click", () => { if (!stage.locked) stageClose(); });
+$("stPrev").addEventListener("click", () => { if (!stage.locked) { if (loop.mode === "play") loopHalt(); step(-1); } });
+$("stNextBtn").addEventListener("click", () => { if (!stage.locked) { if (loop.mode === "play") loopHalt(); activeKey === null ? play(shotKey()) : step(1); } });
+$("stStop").addEventListener("click", () => { if (!stage.locked) stop(); });
+// cadeado: um toque trava; destravar é segurar 1 segundo (para não destravar sem querer)
+let lockHold = null;
+$("stLock").addEventListener("pointerdown", e => {
+  e.preventDefault();
+  if (!stage.locked) {
+    stage.locked = true; $("stage").classList.add("locked"); $("stLock").classList.add("locked"); $("stLock").textContent = "🔒";
+    return;
+  }
+  $("stLock").classList.add("holding");
+  lockHold = setTimeout(() => {
+    stage.locked = false; $("stage").classList.remove("locked"); $("stLock").classList.remove("locked", "holding"); $("stLock").textContent = "🔓";
+    $("stHint").hidden = true;
+  }, 1000);
+});
+["pointerup", "pointerleave", "pointercancel"].forEach(ev => $("stLock").addEventListener(ev, () => { clearTimeout(lockHold); $("stLock").classList.remove("holding"); }));
+// travado: qualquer toque fora do cadeado só mostra o aviso
+$("stage").addEventListener("pointerdown", e => {
+  if (stage.locked && !e.target.closest("#stLock")) {
+    e.preventDefault(); $("stHint").hidden = false;
+    clearTimeout(stageOpen.t); stageOpen.t = setTimeout(() => { $("stHint").hidden = true; }, 1600);
+  }
+}, true);
+FUNCS.push({ id: "stage", name: "Modo Palco liga/desliga", run: () => stage.on ? stageClose() : stageOpen() });
+
+// ---------- Sem internet: app instalável (service worker) + pads guardados no aparelho ----------
+if (window.PAD_ENC) {
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  setTimeout(() => keepAll().then(ok => {
+    if (ok && activeKey === null) setStatus("✓ Pronto para tocar <b>sem internet</b> (sons guardados neste aparelho)");
+  }), 1500);
+}
 
 // ---------- Começo ----------
 buildShots();
